@@ -1,0 +1,249 @@
+<?xml version="1.0"?>
+<config>
+
+
+    <modules>
+        <Inpost_Easypack24>
+            <version>0.1.0</version>
+        </Inpost_Easypack24>
+    </modules>
+
+
+    <frontend>
+        <routers>
+            <easypack24>
+                <use>standard</use>
+                <args>
+                    <module>Inpost_Easypack24</module>
+                    <frontName>easypack24</frontName>
+                </args>
+            </easypack24>
+        </routers>
+
+        <layout>
+            <updates>
+                <easypack24>
+                    <file>easypack24.xml</file>
+                </easypack24>
+            </updates>
+        </layout>
+    </frontend>
+
+
+    <global>
+
+        <events>
+            <checkout_controller_onepage_save_shipping_method>
+                <observers>
+                    <checkout_controller_onepage_save_shipping_method>
+                        <type>model</type>
+                        <class>easypack24/observer</class>
+                        <method>saveShippingMethod</method>
+                    </checkout_controller_onepage_save_shipping_method>
+                </observers>
+            </checkout_controller_onepage_save_shipping_method>
+
+            <sales_model_service_quote_submit_after>
+                <observers>
+                    <checkout_controller_onepage_save_shipping_method>
+                        <type>model</type>
+                        <class>easypack24/observer</class>
+                        <method>saveOrderAfter</method>
+                    </checkout_controller_onepage_save_shipping_method>
+                </observers>
+            </sales_model_service_quote_submit_after>
+
+            <sales_order_load_after>
+                <observers>
+                    <sales_order_load_after>
+                        <type>model</type>
+                        <class>easypack24/observer</class>
+                        <method>loadOrderAfter</method>
+                    </sales_order_load_after>
+                </observers>
+            </sales_order_load_after>
+
+            <sales_quote_load_after>
+                <observers>
+                    <sales_quote_load_after>
+                        <type>model</type>
+                        <class>easypack24/observer</class>
+                        <method>loadQuoteAfter</method>
+                    </sales_quote_load_after>
+                </observers>
+            </sales_quote_load_after>
+
+            <sales_order_shipment_save_after>
+                <observers>
+                    <sales_order_shipment_save_after>
+                        <type>model</type>
+                        <class>easypack24/observer</class>
+                        <method>salesOrderShipmentSaveAfter</method>
+                    </sales_order_shipment_save_after>
+                </observers>
+            </sales_order_shipment_save_after>
+
+        </events>
+
+        <models>
+            <sales>
+                <rewrite>
+                    <order>Inpost_Easypack24_Model_Sales_Order</order>
+                </rewrite>
+            </sales>
+
+            <easypack24>
+                <class>Inpost_Easypack24_Model</class>
+                <resourceModel>easypack24_mysql4</resourceModel>
+            </easypack24>
+
+            <easypack24_mysql4>
+                <class>Inpost_Easypack24_Model_Mysql4</class>
+                <entities>
+                    <easypack24>
+                        <table>order_shipping_easypack24</table>
+                    </easypack24>
+                </entities>
+            </easypack24_mysql4>
+        </models>
+
+        <resources>
+            <easypack24_setup>
+                <setup>
+                    <module>Inpost_Easypack24</module>
+                    <!--<class>Mage_Sales_Model_Mysql4_Setup</class>-->
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </easypack24_setup>
+            <easypack24_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </easypack24_write>
+            <easypack24_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </easypack24_read>
+        </resources>
+
+        <blocks>
+            <easypack24>
+                <class>Inpost_Easypack24_Block</class>
+            </easypack24>
+        </blocks>
+
+        <helpers>
+            <easypack24>
+                <class>Inpost_Easypack24_Helper</class>
+            </easypack24>
+        </helpers>
+    </global>
+
+
+    <default>
+        <carriers>
+            <easypack24>
+                <active>1</active>
+                <model>easypack24/carrier_easypack24</model>
+                <title>Easypack24</title>
+                <name>Easypack24</name>
+                <api_url>http://api-uk.easypack24.net</api_url>
+                <max_weight>25</max_weight>
+                <max_dimension_a>8x38x64</max_dimension_a>
+                <max_dimension_b>19x38x64</max_dimension_b>
+                <max_dimension_c>41x38x64</max_dimension_c>
+                <!--<max_height>41</max_height>-->
+                <!--<max_depth>38</max_depth>-->
+                <!--<max_width>64</max_width>-->
+                <price>14</price>
+                <!--<sallowspecific>1</sallowspecific>-->
+                <!--<specificcountry>UK</specificcountry>-->
+                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+            </easypack24>
+        </carriers>
+    </default>
+
+
+    <admin>
+        <routers>
+            <easypack24>
+                <use>admin</use>
+                <args>
+                    <module>Inpost_Easypack24</module>
+                    <frontName>easypack24</frontName>
+                </args>
+            </easypack24>
+        </routers>
+    </admin>
+
+
+    <adminhtml>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <easypack24 translate="title" module="easypack24">
+                                            <title>Easypack24 Settings</title>
+                                        </easypack24>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+
+                    <children>
+                        <sales>
+                            <children>
+                                <easypack24_adminform>
+                                    <title>Easypack24/Parcels</title>
+                                </easypack24_adminform>
+                            </children>
+                        </sales>
+                    </children>
+
+                </admin>
+            </resources>
+        </acl>
+
+        <menu>
+            <sales>
+                <children>
+                    <inpost translate="title" module="easypack24">
+                        <title>Easypack24</title>
+                        <sort_order>31</sort_order>
+                        <action>easypack24/adminhtml_easypack24</action>
+                    </inpost>
+                </children>
+            </sales>
+        </menu>
+
+        <translate>
+            <modules>
+                <easypack24>
+                    <files>
+                        <default>Inpost_Easypack24.csv</default>
+                    </files>
+                </easypack24>
+            </modules>
+        </translate>
+
+        <layout>
+            <updates>
+                <easypack24>
+                    <file>easypack24.xml</file>
+                </easypack24>
+            </updates>
+        </layout>
+
+    </adminhtml>
+
+
+
+</config>
