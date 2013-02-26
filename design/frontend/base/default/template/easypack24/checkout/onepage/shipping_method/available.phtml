@@ -137,5 +137,10 @@ function hideShippingAll(){
 		jQuery(this).find('.required-entry').attr('disabled','true');
 	});
 }
+
+Validation.add('easypack24_phone', 'Phone validation error', {
+    pattern : /^[1-9]{1}\d{8}$/
+});
+
 </script>
 <?php endif; ?>

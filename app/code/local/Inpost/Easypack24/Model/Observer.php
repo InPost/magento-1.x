@@ -16,13 +16,19 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
 		$quote_id = $quote->getId();
 		$data = array($quote_id => $easypack24);
 
+        //Mage::log(var_export($data, 1) . '------', null, 'save_shipping_method_DATA.log');
+
         $parcelTargetMachineId = @$data[$quote_id]['parcel_target_machine_id'];
         $parcelTargetMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetMachinesDetail();
+        $parcelTargetAllMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetAllMachinesDetail();
         $parcelTargetMachineDetail = array();
 
         if(isset($parcelTargetMachinesDetail[@$data[$quote_id]['parcel_target_machine_id']])){
             $parcelTargetMachineDetail = $parcelTargetMachinesDetail[$parcelTargetMachineId];
         }else{
+            $parcelTargetMachineDetail = $parcelTargetAllMachinesDetail[$parcelTargetMachineId];
+
+            /*
             $machine = Mage::helper('easypack24/data')->connectEasypack24(
                 array(
                     'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'machines/'.$parcelTargetMachineId,
@@ -47,6 +53,7 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
                 );
                 $parcelTargetMachineDetail = $parcelTargetMachineDetail[$parcelTargetMachineId];
             }
+            */
         }
 
         $data[$quote_id]['parcel_detail'] = array(
@@ -55,7 +62,7 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
             //'insurance_amount' => Mage::getStoreConfig('carriers/easypack24/insurance_amount'),
             'receiver' => array(
                 'email' => $shippingAddress->getEmail(),
-                'phone' => $shippingAddress->getTelephone()
+                'phone' => @$data[$quote_id]['receiver_phone']
             ),
             'size' => Mage::getSingleton('checkout/session')->getParcelSize(),
             //'source_machine' => $data['parcel_source_machine'],
@@ -154,8 +161,8 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
             )
         );
         $parcelApi = Mage::helper('easypack24/data')->connectEasypack24($params);
-        //Mage::log(var_export($params, 1) . '------', null, 'parcel_params.log');
-        //Mage::log(var_export($parcel, 1) . '------', null, 'parcel_create.log');
+        Mage::log(var_export($params, 1) . '------', null, 'parcel_params.log');
+        Mage::log(var_export($parcelApi, 1) . '------', null, 'parcel_create.log');
 
         if(@$parcelApi['info']['redirect_url'] != ''){
             $tmp = explode('/', @$parcelApi['info']['redirect_url']);
