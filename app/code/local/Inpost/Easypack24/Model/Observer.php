@@ -161,8 +161,8 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
             )
         );
         $parcelApi = Mage::helper('easypack24/data')->connectEasypack24($params);
-        Mage::log(var_export($params, 1) . '------', null, 'parcel_params.log');
-        Mage::log(var_export($parcelApi, 1) . '------', null, 'parcel_create.log');
+        //Mage::log(var_export($params, 1) . '------', null, 'parcel_params.log');
+        //Mage::log(var_export($parcelApi, 1) . '------', null, 'parcel_create.log');
 
         if(@$parcelApi['info']['redirect_url'] != ''){
             $tmp = explode('/', @$parcelApi['info']['redirect_url']);
