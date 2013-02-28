@@ -77,24 +77,24 @@ class Inpost_Easypack24_Block_Adminhtml_Easypack24_Grid extends Mage_Adminhtml_B
             'gmtoffset' => true
         ));
 
-//        $this->addColumn('action',
-//            array(
-//                'header'    =>  Mage::helper('easypack24')->__('Action'),
-//                'width'     => '10',
-//                'type'      => 'action',
-//                'getter'    => 'getId',
-//                'actions'   => array(
-//                    array(
-//                        'caption'   => Mage::helper('easypack24')->__('View'),
-//                        'url'       => array('base'=> '*/*/view'),
-//                        'field'     => 'id'
-//                    )
-//                ),
-//                'filter'    => false,
-//                'sortable'  => false,
-//                'index'     => 'stores',
-//                'is_system' => true,
-//        ));
+        $this->addColumn('action',
+            array(
+                'header'    =>  Mage::helper('easypack24')->__('Action'),
+                'width'     => '10',
+                'type'      => 'action',
+                'getter'    => 'getId',
+                'actions'   => array(
+                    array(
+                        'caption'   => Mage::helper('easypack24')->__('Edit'),
+                        'url'       => array('base'=> '*/*/edit'),
+                        'field'     => 'id'
+                    )
+                ),
+                'filter'    => false,
+                'sortable'  => false,
+                'index'     => 'id',
+                'is_system' => true,
+        ));
 
         //$this->addExportType('*/*/exportCsv', Mage::helper('easypack24')->__('CSV'));
         //$this->addExportType('*/*/exportXml', Mage::helper('easypack24')->__('Excel XML'));
@@ -127,5 +127,10 @@ class Inpost_Easypack24_Block_Adminhtml_Easypack24_Grid extends Mage_Adminhtml_B
 
         return $this;
     }
+
+//    public function getRowUrl($row)
+//    {
+//        return $this->getUrl('*/*/edit', array('id' => $row->getRuleId()));
+//    }
 
 }

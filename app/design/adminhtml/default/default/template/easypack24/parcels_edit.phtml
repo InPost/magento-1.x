@@ -1,0 +1,40 @@
+<div class="content-header">
+    <table cellspacing="0" class="grid-header">
+        <tr>
+            <td><h3><?=$this->__('Edit parcel')?></h3></td>
+            <td class="a-right">
+                <button onclick="history.back();" class="button" title="<?php echo $this->__('Back') ?>" type="button"><span><span><?php echo $this->__('Back') ?></span></span></button>
+                <button onclick="editForm.submit()" class="scalable save" type="button"><span>Parcel update</span></button>
+            </td>
+        </tr>
+    </table>
+</div>
+<div class="entry-edit">
+    <form id="edit_form" name="edit_form" method="post" action="<?=$this->getUrl('*/*/save')?>">
+        <input name="form_key" type="hidden" value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
+        <h4 class="icon-head head-edit-form fieldset-legend"><?=$this->__('This fieldset name')?></h4>
+        <fieldset id="my-fieldset">
+            <table cellspacing="0" class="form-list">
+                <tr>
+                    <td class="label"><?=$this->__('Parcel box machine')?> <span class="required">*</span></td>
+                    <td class="input-ele"><input class="input-text required-entry" name="easypack24[parcel_target_machine_id]" /></td>
+                </tr>
+                <tr>
+                    <td class="label"><?=$this->__('Parcel description')?> <span class="required">*</span></td>
+                    <td class="input-ele"><input class="input-text required-entry" name="easypack24[parcel_description]" /></td>
+                </tr>
+                <tr>
+                    <td class="label"><?=$this->__('Parcel size')?> <span class="required">*</span></td>
+                    <td class="input-ele"><input class="input-text required-entry" name="easypack24[parcel_size]" /></td>
+                </tr>
+                <tr>
+                    <td class="label"><?=$this->__('Parcel status')?> <span class="required">*</span></td>
+                    <td class="input-ele"><input class="input-text required-entry" name="easypack24[parcel_status]" /></td>
+                </tr>
+            </table>
+        </fieldset>
+    </form>
+</div>
+<script type="text/javascript">
+    var editForm = new varienForm('edit_form');
+</script>

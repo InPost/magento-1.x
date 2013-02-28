@@ -5,8 +5,8 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
 
     protected function _initAction() {
         $this->loadLayout()
-            ->_setActiveMenu('sales/easypack24');
-            //->_addBreadcrumb(Mage::helper('adminhtml')->__('Items Manager'), Mage::helper('adminhtml')->__('Item Manager'));
+            ->_setActiveMenu('sales/easypack24')
+            ->_addBreadcrumb(Mage::helper('adminhtml')->__('Items Manager'), Mage::helper('adminhtml')->__('Item Manager'));
 
         return $this;
     }
@@ -223,5 +223,69 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
         $this->_redirect('*/*/');
     }
 
+    public function editAction(){
 
+        $this->_initAction()
+            ->renderLayout();
+
+//        $id     = $this->getRequest()->getParam('id');
+//        $easypack24Model  = Mage::getModel('easypack24/easypack24')->load($id);
+//
+//        if ($easypack24Model->getId() || $id == 0) {
+//
+//            Mage::register('easypack24_data', $easypack24Model);
+//
+//            $this->loadLayout();
+//            $this->_setActiveMenu('easypack24/items');
+//
+//            $this->_addBreadcrumb(Mage::helper('adminhtml')->__('Item Manager'), Mage::helper('adminhtml')->__('Item Manager'));
+//            $this->_addBreadcrumb(Mage::helper('adminhtml')->__('Item News'), Mage::helper('adminhtml')->__('Item News'));
+//
+//            $this->getLayout()->getBlock('head')->setCanLoadExtJs(true);
+//
+//            $this->_addContent($this->getLayout()->createBlock('easypack24/adminhtml_easypack24_edit'))
+//                ->_addLeft($this->getLayout()->createBlock('easypack24/adminhtml_easypack24_edit_tabs'));
+//
+//            $this->renderLayout();
+//        } else {
+//            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('<module>')->__('Item does not exist'));
+//            $this->_redirect('*/*/');
+//        }
+    }
+
+    public function saveAction()
+    {
+//        if ( $this->getRequest()->getPost() ) {
+//            try {
+//                $postData = $this->getRequest()->getPost();
+//                $<module>Model = Mage::getModel('<module>/<module>');
+//
+//                $<module>Model->setId($this->getRequest()->getParam('id'))
+//                    ->setTitle($postData['title'])
+//                    ->setContent($postData['content'])
+//                    ->setStatus($postData['status'])
+//                    ->save();
+//
+//                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('Item was successfully saved'));
+//                Mage::getSingleton('adminhtml/session')->set<Module>Data(false);
+//
+//                $this->_redirect('*/*/');
+//                return;
+//            } catch (Exception $e) {
+//                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+//                Mage::getSingleton('adminhtml/session')->set<Module>Data($this->getRequest()->getPost());
+//                $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+//                return;
+//            }
+//        }
+//        $this->_redirect('*/*/');
+    }
+
+    public function gridAction()
+    {
+        $this->loadLayout();
+        $this->getResponse()->setBody(
+            $this->getLayout()->createBlock('easypack24/adminhtml_easypack24_grid')->toHtml()
+        );
+    }
 }

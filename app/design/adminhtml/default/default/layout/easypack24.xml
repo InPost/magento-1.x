@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<layout>
+
+    <easypack24_adminhtml_easypack24_index>
+        <reference name="content">
+            <block type="easypack24/adminhtml_easypack24" name="easypack24"></block>
+        </reference>
+    </easypack24_adminhtml_easypack24_index>
+
+    <!--<easypack24_adminhtml_easypack24_edit>-->
+        <!--<reference name="head">-->
+            <!--<action method="setCanLoadExtJs"><flag>1</flag></action>-->
+            <!--<action method="setCanLoadRulesJs"><flag>1</flag></action>-->
+        <!--</reference>-->
+        <!--<reference name="left">-->
+            <!--<block type="easypack24/adminhtml_easypack24_edit_tabs" name="adminhtml_easypack24_edit_tabs">-->
+                <!--<block type="easypack24/adminhtml_easypack24_edit_tab_main" name="adminhtml_easypack24_edit_tab_main" />-->
+                <!--<action method="addTab"><name>main_section</name><block>adminhtml_easypack24_edit_tab_main</block></action>-->
+            <!--</block>-->
+        <!--</reference>-->
+        <!--<reference name="content">-->
+            <!--<block type="easypack24/adminhtml_easypack24_edit" name="easypack24_edit"></block>-->
+        <!--</reference>-->
+    <!--</easypack24_adminhtml_easypack24_edit>-->
+
+    <easypack24_adminhtml_easypack24_edit>
+        <update handle="easypack24_parcels_edit"/>
+        <reference name="content">
+            <block type="adminhtml/template" name="parcels" template="easypack24/parcels_edit.phtml"/>
+        </reference>
+    </easypack24_adminhtml_easypack24_edit>
+
+</layout>
