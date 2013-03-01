@@ -354,11 +354,11 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
                     'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'parcels',
                     'methodType' => 'PUT',
                     'params' => array(
-                        'description' => $postData['parcel_description'] == @$parcelDetailDb->description?null:$postData['parcel_description'],
+                        'description' => !isset($postData['parcel_description']) || $postData['parcel_description'] == @$parcelDetailDb->description?null:$postData['parcel_description'],
                         'id' => $postData['parcel_id'],
-                        'size' => $postData['parcel_size'] == @$parcelDetailDb->size?null:$postData['parcel_size'],
-                        'status' => $postData['parcel_status'] == $easypack24Model->getParcelStatus()?null:$postData['parcel_status'],
-                        //'target_machine' => $postData['parcel_target_machine_id'] == $easypack24Model->getParcelTargetMachineId()?null:$postData['parcel_target_machine_id']
+                        'size' => !isset($postData['parcel_size']) || $postData['parcel_size'] == @$parcelDetailDb->size?null:$postData['parcel_size'],
+                        'status' => !isset($postData['parcel_status']) || $postData['parcel_status'] == $easypack24Model->getParcelStatus()?null:$postData['parcel_status'],
+                        //'target_machine' => !isset($postData['parcel_target_machine_id']) || $postData['parcel_target_machine_id'] == $easypack24Model->getParcelTargetMachineId()?null:$postData['parcel_target_machine_id']
                     )
                 );
                 $parcelApi = Mage::helper('easypack24/data')->connectEasypack24($params);
@@ -378,14 +378,14 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
                     $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
                     return;
                 }else{
-                    $easypack24Model->setParcelStatus($postData['parcel_status']);
+                    $easypack24Model->setParcelStatus(isset($postData['parcel_status'])?$postData['parcel_status']:$easypack24Model->getParcelStatus());
                     $easypack24Model->setParcelDetail(json_encode(array(
                         'description' => $postData['parcel_description'],
                         'receiver' => array(
                             'email' => $parcelDetailDb->receiver->email,
                             'phone' => $parcelDetailDb->receiver->phone
                         ),
-                        'size' => $postData['parcel_size'],
+                        'size' => isset($postData['parcel_size'])?$postData['parcel_size']:@$parcelDetailDb->size,
                         'tmp_id' => $parcelDetailDb->tmp_id,
                     )));
 
