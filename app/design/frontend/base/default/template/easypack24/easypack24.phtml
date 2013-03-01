@@ -6,21 +6,6 @@
 
     //Mage::log(var_export($_SESSION, 1) . '------', null, 'session.log');
 
-    /*
-    $machinesTest = Mage::helper('easypack24/data')->connectEasypack24(
-        array(
-            'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'machines',
-            'methodType' => 'GET',
-            'params' => array(
-                'town' => $this->getQuote()->getShippingAddress()->getCity(),
-                'post_code' => $this->getQuote()->getShippingAddress()->getPostcode() // post code has priority the town
-            )
-        )
-    );
-    */
-    //Mage::log(var_export($machinesTest, 1) . '------', null, 'machinesTest.log');
-
-
     $allMachines = Mage::helper('easypack24/data')->connectEasypack24(
         array(
             'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'machines',

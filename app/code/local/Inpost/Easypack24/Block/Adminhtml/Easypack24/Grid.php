@@ -15,7 +15,8 @@ class Inpost_Easypack24_Block_Adminhtml_Easypack24_Grid extends Mage_Adminhtml_B
 
     protected function _prepareCollection()
     {
-        $collection = Mage::getModel('easypack24/easypack24')->getCollection();;
+        $collection = Mage::getModel('easypack24/easypack24')->getCollection();
+        //$collection->addAttributeToFilter('parcel_id', array('notnull' => true));
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }

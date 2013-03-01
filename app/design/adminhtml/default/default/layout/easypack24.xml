@@ -7,23 +7,15 @@
         </reference>
     </easypack24_adminhtml_easypack24_index>
 
-    <!--<easypack24_adminhtml_easypack24_edit>-->
-        <!--<reference name="head">-->
-            <!--<action method="setCanLoadExtJs"><flag>1</flag></action>-->
-            <!--<action method="setCanLoadRulesJs"><flag>1</flag></action>-->
-        <!--</reference>-->
-        <!--<reference name="left">-->
-            <!--<block type="easypack24/adminhtml_easypack24_edit_tabs" name="adminhtml_easypack24_edit_tabs">-->
-                <!--<block type="easypack24/adminhtml_easypack24_edit_tab_main" name="adminhtml_easypack24_edit_tab_main" />-->
-                <!--<action method="addTab"><name>main_section</name><block>adminhtml_easypack24_edit_tab_main</block></action>-->
-            <!--</block>-->
-        <!--</reference>-->
-        <!--<reference name="content">-->
-            <!--<block type="easypack24/adminhtml_easypack24_edit" name="easypack24_edit"></block>-->
-        <!--</reference>-->
-    <!--</easypack24_adminhtml_easypack24_edit>-->
-
     <easypack24_adminhtml_easypack24_edit>
+        <reference name='head'>
+            <reference name="head">
+                <action method="addItem"><type>js</type><name>easypack24/jquery-1.6.4.min.js</name></action>
+                <!--<action method="addItem"><name>https://geowidget.inpost.co.uk/dropdown.php?dropdown_name=machine&field_to_update=name&field_to_update2=address&user_function=user_function</name></action>-->
+                <action method="addItem"><type>js</type><name>easypack24/noconflict.js</name></action>
+            </reference>
+        </reference>
+
         <update handle="easypack24_parcels_edit"/>
         <reference name="content">
             <block type="adminhtml/template" name="parcels" template="easypack24/parcels_edit.phtml"/>

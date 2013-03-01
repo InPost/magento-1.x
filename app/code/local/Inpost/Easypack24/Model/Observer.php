@@ -27,33 +27,6 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
             $parcelTargetMachineDetail = $parcelTargetMachinesDetail[$parcelTargetMachineId];
         }else{
             $parcelTargetMachineDetail = $parcelTargetAllMachinesDetail[$parcelTargetMachineId];
-
-            /*
-            $machine = Mage::helper('easypack24/data')->connectEasypack24(
-                array(
-                    'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'machines/'.$parcelTargetMachineId,
-                    'methodType' => 'GET',
-                    'params' => array(
-                        'town' => $request->getParam('box_machine_town',false)
-                    )
-                )
-            );
-            if(is_array(@$machine['result'])){
-                $machine = $machine['result'];
-                $parcelTargetMachineDetail = array(
-                    'id' => $parcelTargetMachineId,
-                    'address' => array(
-                        'building_number' => @$machine->address->building_number,
-                        'flat_number' => @$machine->address->flat_number,
-                        'post_code' => @$machine->address->post_code,
-                        'province' => @$machine->address->province,
-                        'street' => @$machine->address->street,
-                        'city' => @$machine->address->city
-                    )
-                );
-                $parcelTargetMachineDetail = $parcelTargetMachineDetail[$parcelTargetMachineId];
-            }
-            */
         }
 
         $data[$quote_id]['parcel_detail'] = array(
