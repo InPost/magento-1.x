@@ -45,6 +45,16 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
             ));
 
             Mage::log(var_export($parcelApiPay, 1) . '------', null, date('Y-m-d H:i:s').'-parcels_pay.log');
+            if(@$parcelApiPay['info']['http_code'] != '204'){
+                $countNonSticker = count($parcelsIds);
+                if(!empty($parcelApiPay['result'])){
+                    foreach(@$parcelApiPay['result'] as $key => $error){
+                        $this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
+                    }
+                }
+                $this->_redirect('*/*/');
+                return;
+            }
 
             $parcelApi = Mage::helper('easypack24/data')->connectEasypack24(array(
                 'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'stickers/'.implode(';', $parcelsCode),
