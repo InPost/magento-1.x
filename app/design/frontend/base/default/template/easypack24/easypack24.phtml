@@ -92,7 +92,7 @@
     <li>
         <label for="<?php echo $_code ?>_receiver_phone" class="required"><em>*</em><?php echo $this->__("Mobile e.g. 523045856") ?></label>
         <span class="input-box">
-        	<input type='text' name='shipping_easypack24[receiver_phone]' id="<?php echo $_code ?>_phone" title="mobile /^[1-9]{1}\d{8}$/" class='required-entry input-text validate-number validate-length minimum-length-9 maximum-length-9 easypack24_phone' value='<?php echo $easypack24Data['receiver_phone']?$easypack24Data['receiver_phone']:$this->getQuote()->getShippingAddress()->getTelephone()?>' />
+        	(07) <input type='text' name='shipping_easypack24[receiver_phone]' id="<?php echo $_code ?>_phone" title="mobile /^[1-9]{1}\d{8}$/" class='required-entry validate-number validate-length minimum-length-9 maximum-length-9 easypack24_phone' value='<?php echo $easypack24Data['receiver_phone']?$easypack24Data['receiver_phone']:$this->getQuote()->getShippingAddress()->getTelephone()?>' />
         </span>
     </li>
 </ul>

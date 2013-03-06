@@ -128,7 +128,8 @@ class Inpost_Easypack24_Model_Carrier_Easypack24  extends Mage_Shipping_Model_Ca
             $method->setCarrier($this->_code);
             $method->setMethod($this->_code);
             $method->setCarrierTitle($this->getConfigData('title'));
-            $method->setMethodTitle($this->getConfigData('name'));
+            //$method->setMethodTitle($this->getConfigData('name'));
+            $method->setMethodTitle('Price');
             $method->setMethodDescription($this->getConfigData('desc'));
             $method->setPrice($this->getConfigData('price'));
             $method->setCost($this->getConfigData('price'));

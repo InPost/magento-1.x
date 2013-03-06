@@ -4,7 +4,7 @@
         <carriers>
             <groups>
                 <easypack24 translate="label" module="easypack24">
-                    <label>Easypack24</label>
+                    <label>InPost Parcel Lockers 24/7</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>1</sort_order>
                     <show_in_default>1</show_in_default>
@@ -12,7 +12,7 @@
                     <show_in_store>1</show_in_store>
                     <fields>
                         <version translate="label">
-                            <label>Easypack24 ver.</label>
+                            <label>InPost Parcel Lockers 24/7 ver.</label>
                             <frontend_type>select</frontend_type>
                             <frontend_model>Inpost_Easypack24_Block_Admin_Version</frontend_model>
                             <sort_order>1</sort_order>

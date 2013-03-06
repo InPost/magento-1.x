@@ -216,7 +216,7 @@
             <sales>
                 <children>
                     <inpost translate="title" module="easypack24">
-                        <title>Easypack24</title>
+                        <title>InPost Parcel Lockers 24/7</title>
                         <sort_order>31</sort_order>
                         <action>easypack24/adminhtml_easypack24</action>
                     </inpost>

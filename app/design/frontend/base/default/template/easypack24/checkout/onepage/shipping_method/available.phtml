@@ -33,7 +33,11 @@
     <dl class="sp-methods">
     <?php $shippingCodePrice = array(); ?>
     <?php $_sole = count($_shippingRateGroups) == 1; foreach ($_shippingRateGroups as $code => $_rates): ?>
-        <dt><?php echo $this->getCarrierName($code) ?></dt>
+        <?php if($this->getCarrierName($code) != 'Easypack24'): ?>
+            <dt><?php echo $this->getCarrierName($code) ?></dt>
+        <?php else: ?>
+            <dt><?php echo Mage::getStoreConfig('carriers/easypack24/name'); ?></dt>
+        <?php endif; ?>
         <dd>
             <ul>
             <?php $_sole = $_sole && count($_rates) == 1; foreach ($_rates as $_rate): ?>

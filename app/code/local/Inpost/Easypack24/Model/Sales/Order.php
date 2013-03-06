@@ -5,8 +5,13 @@ class Inpost_Easypack24_Model_Sales_Order extends Mage_Sales_Model_Order{
     	$easypack24Object = $this->getEasypack24Object();
         //Mage::log(var_export($easypack24Object, 1) . '------', null, 'shipping_description.log');
 
+
         if($easypack24Object && $easypack24Object->getParcelTargetMachineId() != ''){
-            $desc .= ' /  Target Box Machine: '.$easypack24Object->getParcelTargetMachineId().'  /  ';
+            if($this->getShippingMethod() == 'easypack24_easypack24'){
+                $desc = Mage::getStoreConfig('carriers/easypack24/name').' /  Target Box Machine: '.$easypack24Object->getParcelTargetMachineId().'  /  ';
+            }else{
+                $desc .= ' /  Target Box Machine: '.$easypack24Object->getParcelTargetMachineId().'  /  ';
+            }
 		}
 		return $desc;
 	}
@@ -31,4 +36,6 @@ class Inpost_Easypack24_Model_Sales_Order extends Mage_Sales_Model_Order{
 
         return $desc;
     }
+
+
 }
