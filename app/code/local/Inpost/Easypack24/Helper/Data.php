@@ -12,11 +12,11 @@ class Inpost_Easypack24_Helper_Data extends Mage_Core_Helper_Abstract
     }
 
     public function connectEasypack24($params = array()){
-
         $params = array_merge(
             array(
                 'url' => $params['url'],
                 'token' => Mage::getStoreConfig('carriers/easypack24/api_key'),
+                'ds' => '?',
                 'methodType' => $params['methodType'],
                 'params' => $params['params']
             ),
@@ -33,9 +33,9 @@ class Inpost_Easypack24_Helper_Data extends Mage_Core_Helper_Abstract
                     foreach($params['params'] as $field_name => $field_value){
                         $getParams .= $field_name.'='.urlencode($field_value).'&';
                     }
-                    curl_setopt($ch, CURLOPT_URL, $params['url'].'?token='.$params['token'].'&'.$getParams);
+                    curl_setopt($ch, CURLOPT_URL, $params['url'].$params['ds'].'token='.$params['token'].'&'.$getParams);
                 }else{
-                    curl_setopt($ch, CURLOPT_URL, $params['url'].'?token='.$params['token']);
+                    curl_setopt($ch, CURLOPT_URL, $params['url'].$params['ds'].'token='.$params['token']);
                 }
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
                 break;
@@ -44,13 +44,13 @@ class Inpost_Easypack24_Helper_Data extends Mage_Core_Helper_Abstract
                 $string = json_encode($params['params']);
                 #$string = $params['params'];
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-HTTP-Method-Override: POST') );
-                curl_setopt($ch, CURLOPT_URL, $params['url'].'?token='.$params['token']);
+                curl_setopt($ch, CURLOPT_URL, $params['url'].$params['ds'].'token='.$params['token']);
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $string);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                    'Content-Type: application/json',
-                    'Content-Length: ' . strlen($string))
+                        'Content-Type: application/json',
+                        'Content-Length: ' . strlen($string))
                 );
                 break;
 
@@ -58,13 +58,13 @@ class Inpost_Easypack24_Helper_Data extends Mage_Core_Helper_Abstract
                 $string = json_encode($params['params']);
                 #$string = $params['params'];
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-HTTP-Method-Override: PUT') );
-                curl_setopt($ch, CURLOPT_URL, $params['url'].'?token='.$params['token']);
+                curl_setopt($ch, CURLOPT_URL, $params['url'].$params['ds'].'token='.$params['token']);
                 curl_setopt($ch, CURLOPT_POST, true);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $string);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                 curl_setopt($ch, CURLOPT_HTTPHEADER, array(
-                    'Content-Type: application/json',
-                    'Content-Length: ' . strlen($string))
+                        'Content-Type: application/json',
+                        'Content-Length: ' . strlen($string))
                 );
                 break;
 
@@ -78,6 +78,7 @@ class Inpost_Easypack24_Helper_Data extends Mage_Core_Helper_Abstract
             'errno' => curl_errno($ch),
             'error' => curl_error($ch)
         );
+
     }
 
     public function generate($type = 1, $length){

@@ -138,11 +138,27 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
         //Mage::log(var_export($parcelApi, 1) . '------', null, 'parcel_create.log');
 
         if(@$parcelApi['info']['redirect_url'] != ''){
-            $tmp = explode('/', @$parcelApi['info']['redirect_url']);
-            $parcelId = $tmp[count($tmp)-1];
+
+            // get machine
+            $parcelApi = Mage::helper('easypack24/data')->connectEasypack24(
+                array(
+                    'url' => $parcelApi['info']['redirect_url'],
+                    'ds' => '&',
+                    'methodType' => 'GET',
+                    'params' => array(
+                    )
+                )
+            );
+
+            if(!isset($parcelApi['result']->id)){
+                $this->_getSession()->addError($this->__('Cannot create parcel.'));
+                Mage::throwException('Cannot create parcel');
+                Mage::log(var_export($parcelApi, 1) . '------', null, 'error_observer_sales_order_shipment_save_after_cannot_create_parcel.log');
+            }
+
             // update parcel status on 'Created'
             $easypack24->setParcelStatus('Created');
-            $easypack24->setParcelId($parcelId);
+            $easypack24->setParcelId($parcelApi['result']->id);
             $easypack24->save();
         }else{
             $this->_getSession()->addError($this->__('Cannot create parcel.'));
