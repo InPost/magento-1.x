@@ -115,4 +115,75 @@ class Inpost_Easypack24_Helper_Data extends Mage_Core_Helper_Abstract
             'Prepared' => 'Prepared'
         );
     }
+
+    public static function calculateDimensions($product_dimensions = array(), $config = array()){
+        $parcelSize = 'A';
+        $is_dimension = true;
+
+        if(!empty($max_dimensions)){
+            $maxDimensionFromConfigSizeA = explode('x', strtolower(trim($config['MAX_DIMENSION_A'])));
+            $maxWidthFromConfigSizeA = (float)trim(@$maxDimensionFromConfigSizeA[0]);
+            $maxHeightFromConfigSizeA = (float)trim(@$maxDimensionFromConfigSizeA[1]);
+            $maxDepthFromConfigSizeA = (float)trim(@$maxDimensionFromConfigSizeA[2]);
+            // flattening to one dimension
+            $maxSumDimensionFromConfigSizeA = $maxWidthFromConfigSizeA + $maxHeightFromConfigSizeA + $maxDepthFromConfigSizeA;
+
+            $maxDimensionFromConfigSizeB = explode('x', strtolower(trim($config['MAX_DIMENSION_B'])));
+            $maxWidthFromConfigSizeB = (float)trim(@$maxDimensionFromConfigSizeB[0]);
+            $maxHeightFromConfigSizeB = (float)trim(@$maxDimensionFromConfigSizeB[1]);
+            $maxDepthFromConfigSizeB = (float)trim(@$maxDimensionFromConfigSizeB[2]);
+            // flattening to one dimension
+            $maxSumDimensionFromConfigSizeB = $maxWidthFromConfigSizeB + $maxHeightFromConfigSizeB + $maxDepthFromConfigSizeB;
+
+            $maxDimensionFromConfigSizeC = explode('x', strtolower(trim($config['MAX_DIMENSION_C'])));
+            $maxWidthFromConfigSizeC = (float)trim(@$maxDimensionFromConfigSizeC[0]);
+            $maxHeightFromConfigSizeC = (float)trim(@$maxDimensionFromConfigSizeC[1]);
+            $maxDepthFromConfigSizeC = (float)trim(@$maxDimensionFromConfigSizeC[2]);
+
+            if($maxWidthFromConfigSizeC == 0 || $maxHeightFromConfigSizeC == 0 || $maxDepthFromConfigSizeC == 0){
+                // bad format in admin configuration
+                $is_dimension = false;
+            }
+            // flattening to one dimension
+            $maxSumDimensionFromConfigSizeC = $maxWidthFromConfigSizeC + $maxHeightFromConfigSizeC + $maxDepthFromConfigSizeC;
+            $maxSumDimensionsFromProducts = 0;
+            foreach($product_dimensions as $product_dimension){
+                $dimension = explode('x', $product_dimension);
+                $width = trim(@$dimension[0]);
+                $height = trim(@$dimension[1]);
+                $depth = trim(@$dimension[2]);
+                if($width == 0 || $height == 0 || $depth){
+                    // empty dimension for product
+                    continue;
+                }
+
+                if(
+                    $width > $maxWidthFromConfigSizeC ||
+                    $height > $maxHeightFromConfigSizeC ||
+                    $depth > $maxDepthFromConfigSizeC
+                ){
+                    $is_dimension = false;
+                }
+
+                $maxSumDimensionsFromProducts = $maxSumDimensionsFromProducts + $width + $height + $depth;
+                if($maxSumDimensionsFromProducts > $maxSumDimensionFromConfigSizeC){
+                    $is_dimension = false;
+                }
+            }
+            if($maxSumDimensionsFromProducts <= $maxDimensionFromConfigSizeA){
+                $parcelSize = 'A';
+            }elseif($maxSumDimensionsFromProducts <= $maxDimensionFromConfigSizeB){
+                $parcelSize = 'B';
+            }elseif($maxSumDimensionsFromProducts <= $maxDimensionFromConfigSizeC){
+                $parcelSize = 'C';
+            }
+        }
+
+        return array(
+            'parcelSize' => $parcelSize,
+            'isDimension' => $is_dimension
+        );
+    }
+
+    
 }

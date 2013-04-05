@@ -63,6 +63,7 @@ class Inpost_Easypack24_Model_Observer extends Varien_Object
         if(isset($easypack24[$quote_id])){
 			$data = $easypack24[$quote_id];
 			$data['order_id'] = $order->getId();
+            $data['parcel_detail']['description'] = 'Order number:'.$order->getId();
             $easypack24Model = Mage::getModel('easypack24/easypack24');
             $easypack24Model->setOrderId($data['order_id']);
             $easypack24Model->setParcelDetail(json_encode($data['parcel_detail']));

@@ -17,17 +17,23 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
     }
 
     public function massStickersAction()
-    {
+    {        
         $parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
         $countSticker = 0;
         $countNonSticker = 0;
         $pdf = null;
 
         $parcelsCode = array();
+        $parcelsToPay = array();
+
         foreach ($parcelsIds as $id) {
             $parcelCollection = Mage::getModel('easypack24/easypack24')->load($id);
             if($parcelCollection->getParcelId() != ''){
                 $parcelsCode[$id] = $parcelCollection->getParcelId();
+                if($parcelCollection->getStickerCreationDate() == ''){
+                    $parcelsToPay[$id] = $parcelCollection->getParcelId();
+                }
+
             }else{
                 continue;
             }
@@ -36,25 +42,26 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
         if(empty($parcelsCode)){
             $this->_getSession()->addError($this->__('Parcel ID is empty'));
         }else{
+            if(!empty($parcelsToPay)){
+                $parcelApiPay = Mage::helper('easypack24/data')->connectEasypack24(array(
+                    'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'parcels/'.implode(';', $parcelsToPay).'/pay',
+                    'methodType' => 'POST',
+                    'params' => array(
+                    )
+                ));
 
-            $parcelApiPay = Mage::helper('easypack24/data')->connectEasypack24(array(
-                'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'parcels/'.implode(';', $parcelsCode).'/pay',
-                'methodType' => 'POST',
-                'params' => array(
-                )
-            ));
-
-            Mage::log(var_export($parcelApiPay, 1) . '------', null, date('Y-m-d H:i:s').'-parcels_pay.log');
-            if(@$parcelApiPay['info']['http_code'] != '204'){
-                $countNonSticker = count($parcelsIds);
-                if(!empty($parcelApiPay['result'])){
-                    foreach(@$parcelApiPay['result'] as $key => $error){
-                        $this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
+                Mage::log(var_export($parcelApiPay, 1) . '------', null, date('Y-m-d H:i:s').'-parcels_pay.log');
+                if(@$parcelApiPay['info']['http_code'] != '204'){
+                    $countNonSticker = count($parcelsIds);
+                    if(!empty($parcelApiPay['result'])){
+                        foreach(@$parcelApiPay['result'] as $key => $error){
+                            $this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
+                        }
                     }
+                    $this->_redirect('*/*/');
+                    return;
                 }
-                $this->_redirect('*/*/');
-                return;
-            }
+            }    
 
             $parcelApi = Mage::helper('easypack24/data')->connectEasypack24(array(
                 'url' => Mage::getStoreConfig('carriers/easypack24/api_url').'stickers/'.implode(';', $parcelsCode),
@@ -75,10 +82,12 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
             }
         }else{
             foreach ($parcelsIds as $parcelId) {
-                $parcelDb = Mage::getModel('easypack24/easypack24')->load($parcelId);
-                $parcelDb->setParcelStatus('Prepared');
-                $parcelDb->setStickerCreationDate(date('Y-m-d H:i:s'));
-                $parcelDb->save();
+                if(isset($parcelsToPay[$parcelId])){
+                    $parcelDb = Mage::getModel('easypack24/easypack24')->load($parcelId);
+                    $parcelDb->setParcelStatus('Prepared');
+                    $parcelDb->setStickerCreationDate(date('Y-m-d H:i:s'));
+                    $parcelDb->save();
+                }
                 $countSticker++;
             }
             $pdf = base64_decode(@$parcelApi['result']);
@@ -100,9 +109,10 @@ class Inpost_Easypack24_Adminhtml_Easypack24Controller extends Mage_Adminhtml_Co
                 'stickers'.Mage::getSingleton('core/date')->date('Y-m-d_H-i-s').'.pdf', $pdf,
                 'application/pdf'
             );
+        }else{
+            $this->_redirect('*/*/');
         }
 
-        $this->_redirect('*/*/');
     }
 
     public function massRefreshStatusAction()

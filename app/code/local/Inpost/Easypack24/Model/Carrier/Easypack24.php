@@ -30,7 +30,7 @@ class Inpost_Easypack24_Model_Carrier_Easypack24  extends Mage_Shipping_Model_Ca
         $maxDimensions = array();
         foreach ($cart->getAllItems() as $item) {
             $maxWeight += $item->getProduct()->getWeight();
-            $maxDimensions[] = (float)$item->getProduct()->getPackageWidth().'x'.(float)$item->getProduct()->getPackageHeight().'x'.(float)$item->getProduct()->getPackageDepth();
+            $product_dimensions[] = (float)$item->getProduct()->getPackageWidth().'x'.(float)$item->getProduct()->getPackageHeight().'x'.(float)$item->getProduct()->getPackageDepth();
         }
 
         // check max weight ( all products )
@@ -38,90 +38,16 @@ class Inpost_Easypack24_Model_Carrier_Easypack24  extends Mage_Shipping_Model_Ca
             return false;
         }
 
-        // check dimensions ( single product )
-        /*
-        if(!empty($maxDimensions)){
-            foreach($maxDimensions as $maxDimension){
-                $dimension = explode('x', $maxDimension);
-                $width = trim($dimension[0]);
-                $height = trim($dimension[1]);
-                $depth = trim($dimension[2]);
-
-                if(
-                    $width > Mage::getStoreConfig('carriers/easypack24/max_width') ||
-                    $height > Mage::getStoreConfig('carriers/easypack24/max_height') ||
-                    $depth > Mage::getStoreConfig('carriers/easypack24/max_depth')
-                ){
-                    return false;
-                }
-            }
-        }
-        */
-
-        // Mage::log(var_export(array($maxWeight, $maxDimensions), 1) . '------', null, 'shipments.log');
-
         // check dimensions ( multiple product )
-        $parcelSize = 'A';
-        if(!empty($maxDimensions)){
-            $maxDimensionFromConfigSizeA = explode('x', strtolower(trim(Mage::getStoreConfig('carriers/easypack24/max_dimension_a'))));
-            $maxWidthFromConfigSizeA = (float)trim(@$maxDimensionFromConfigSizeA[0]);
-            $maxHeightFromConfigSizeA = (float)trim(@$maxDimensionFromConfigSizeA[1]);
-            $maxDepthFromConfigSizeA = (float)trim(@$maxDimensionFromConfigSizeA[2]);
-            // flattening to one dimension
-            $maxSumDimensionFromConfigSizeA = $maxWidthFromConfigSizeA + $maxHeightFromConfigSizeA + $maxDepthFromConfigSizeA;
+        $calculateDimension = Mage::helper('easypack24/data')->calculateDimensions($product_dimensions, array(
+            Mage::getStoreConfig('carriers/easypack24/max_dimension_a'), Mage::getStoreConfig('carriers/easypack24/max_dimension_b'), Mage::getStoreConfig('carriers/easypack24/max_dimension_c')
+        ));
 
-            $maxDimensionFromConfigSizeB = explode('x', strtolower(trim(Mage::getStoreConfig('carriers/easypack24/max_dimension_b'))));
-            $maxWidthFromConfigSizeB = (float)trim(@$maxDimensionFromConfigSizeB[0]);
-            $maxHeightFromConfigSizeB = (float)trim(@$maxDimensionFromConfigSizeB[1]);
-            $maxDepthFromConfigSizeB = (float)trim(@$maxDimensionFromConfigSizeB[2]);
-            // flattening to one dimension
-            $maxSumDimensionFromConfigSizeB = $maxWidthFromConfigSizeB + $maxHeightFromConfigSizeB + $maxDepthFromConfigSizeB;
-
-            $maxDimensionFromConfigSizeC = explode('x', strtolower(trim(Mage::getStoreConfig('carriers/easypack24/max_dimension_c'))));
-            $maxWidthFromConfigSizeC = (float)trim(@$maxDimensionFromConfigSizeC[0]);
-            $maxHeightFromConfigSizeC = (float)trim(@$maxDimensionFromConfigSizeC[1]);
-            $maxDepthFromConfigSizeC = (float)trim(@$maxDimensionFromConfigSizeC[2]);
-
-            if($maxWidthFromConfigSizeC == 0 || $maxHeightFromConfigSizeC == 0 || $maxDepthFromConfigSizeC == 0){
-                // bad format in admin configuration
-                return false;
-            }
-            // flattening to one dimension
-            $maxSumDimensionFromConfigSizeC = $maxWidthFromConfigSizeC + $maxHeightFromConfigSizeC + $maxDepthFromConfigSizeC;
-            $maxSumDimensionsFromProducts = 0;
-            foreach($maxDimensions as $maxDimension){
-                $dimension = explode('x', $maxDimension);
-                $width = trim(@$dimension[0]);
-                $height = trim(@$dimension[1]);
-                $depth = trim(@$dimension[2]);
-                if($width == 0 || $height == 0 || $depth){
-                    // empty dimension for product
-                    continue;
-                }
-
-                if(
-                    $width > $maxWidthFromConfigSizeC ||
-                    $height > $maxHeightFromConfigSizeC ||
-                    $depth > $maxDepthFromConfigSizeC
-                ){
-                    return false;
-                }
-
-                $maxSumDimensionsFromProducts = $maxSumDimensionsFromProducts + $width + $height + $depth;
-                if($maxSumDimensionsFromProducts > $maxSumDimensionFromConfigSizeC){
-                    return false;
-                }
-            }
-            if($maxSumDimensionsFromProducts <= $maxDimensionFromConfigSizeA){
-                $parcelSize = 'A';
-            }elseif($maxSumDimensionsFromProducts <= $maxDimensionFromConfigSizeB){
-                $parcelSize = 'B';
-            }elseif($maxSumDimensionsFromProducts <= $maxDimensionFromConfigSizeC){
-                $parcelSize = 'C';
-            }
-            Mage::getSingleton('checkout/session')->setParcelSize($parcelSize);
+        if(!$calculateDimension['isDimension']){
+            return false;
         }
-        //$_SESSION['easypack24'] = $maxDimensions;
+
+        Mage::getSingleton('checkout/session')->setParcelSize($calculateDimension['parcelSize']);
 
         if($show){
             $method = Mage::getModel('shipping/rate_result_method');

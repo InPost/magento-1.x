@@ -69,6 +69,11 @@
     }
     //Mage::log(var_export($parcelTargetAllMachinesDetail, 1) . '------', null, 'all_machines.log');
 
+    $user_phone = $this->getQuote()->getShippingAddress()->getTelephone();
+    if(!preg_match('/^[1-9]{1}\d{8}$/', $user_phone)){
+        $user_phone = null;
+    }
+
 ?>
 <ul class="form-list" id="shipping_form_<?php echo $_rate->getCode() ?>" style="display:none;">
     <li>
@@ -92,7 +97,7 @@
     <li>
         <label for="<?php echo $_code ?>_receiver_phone" class="required"><em>*</em><?php echo $this->__("Mobile e.g. 523045856") ?></label>
         <span class="input-box">
-        	(07) <input type='text' name='shipping_easypack24[receiver_phone]' id="<?php echo $_code ?>_phone" title="mobile /^[1-9]{1}\d{8}$/" class='required-entry validate-number validate-length minimum-length-9 maximum-length-9 easypack24_phone' value='<?php echo $easypack24Data['receiver_phone']?$easypack24Data['receiver_phone']:$this->getQuote()->getShippingAddress()->getTelephone()?>' />
+        	(07) <input type='text' name='shipping_easypack24[receiver_phone]' id="<?php echo $_code ?>_phone" title="mobile /^[1-9]{1}\d{8}$/" class='required-entry validate-number validate-length minimum-length-9 maximum-length-9 easypack24_phone' value='<?php echo $easypack24Data['receiver_phone']?$easypack24Data['receiver_phone']:$user_phone?>' />
         </span>
     </li>
 </ul>
