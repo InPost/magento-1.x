@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<layout version="0.1.0">
+    <checkout_onepage_index>
+    	<reference name='head'>
+    		<reference name="head">
+	            <action method="addItem"><type>js</type><name>inpostparcels/jquery-1.6.4.min.js</name></action>
+                <!--<action method="addItem"><name>https://geowidget.inpost.co.uk/dropdown.php?dropdown_name=machine&field_to_update=name&field_to_update2=address&user_function=user_function</name></action>-->
+                <action method="addItem"><type>js</type><name>inpostparcels/noconflict.js</name></action>
+        	</reference>
+    	</reference>
+    	<reference name='checkout.onepage.shipping_method.available'>
+    		<action method='setTemplate'><template>inpostparcels/checkout/onepage/shipping_method/available.phtml</template></action>
+    	</reference>
+    </checkout_onepage_index>
+    <checkout_onepage_shippingmethod>
+    	<reference name='root'>
+    		<action method='setTemplate'><template>inpostparcels/checkout/onepage/shipping_method/available.phtml</template></action>
+    	</reference>
+    </checkout_onepage_shippingmethod>
+</layout>

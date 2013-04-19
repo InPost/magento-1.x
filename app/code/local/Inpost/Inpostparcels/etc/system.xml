@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+    <sections>
+        <carriers>
+            <groups>
+                <inpostparcels translate="label" module="inpostparcels">
+                    <label>InPost Parcel Lockers 24/7</label>
+                    <frontend_type>text</frontend_type>
+                    <sort_order>1</sort_order>
+                    <show_in_default>1</show_in_default>
+                    <show_in_website>1</show_in_website>
+                    <show_in_store>1</show_in_store>
+                    <fields>
+                        <version translate="label">
+                            <label>InPost Parcel Lockers 24/7 ver.</label>
+                            <frontend_type>select</frontend_type>
+                            <frontend_model>Inpost_Inpostparcels_Block_Admin_Version</frontend_model>
+                            <sort_order>1</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </version>
+                        <active translate="label">
+                            <label>Enabled</label>
+                            <frontend_type>select</frontend_type>
+                            <source_model>adminhtml/system_config_source_yesno</source_model>
+                            <sort_order>2</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </active>
+                        <title translate="label">
+                            <label>Title</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>3</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>1</show_in_store>
+                        </title>
+                        <name translate="label">
+                            <label>Method Name</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>4</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </name>
+                        <api_url translate="label">
+                            <label>Api url</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>5</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </api_url>
+                        <api_key translate="label">
+                            <label>Api key</label>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>6</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </api_key>
+                        <desc translate="label">
+                            <label>Description</label>
+                            <comment>Description shown to customer</comment>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>7</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </desc>
+                        <price translate="label">
+                            <label>Price</label>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number validate-zero-or-greater</validate>
+                            <sort_order>8</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </price>
+                        <!--<cod_amount translate="label">-->
+                            <!--<label>Cod amount</label>-->
+                            <!--<frontend_type>text</frontend_type>-->
+                            <!--<validate>validate-number validate-zero-or-greater</validate>-->
+                            <!--<sort_order>9</sort_order>-->
+                            <!--<show_in_default>1</show_in_default>-->
+                            <!--<show_in_website>1</show_in_website>-->
+                            <!--<show_in_store>0</show_in_store>-->
+                        <!--</cod_amount>-->
+                        <!--<insurance_amount translate="label">-->
+                            <!--<label>Insurance amount</label>-->
+                            <!--<frontend_type>text</frontend_type>-->
+                            <!--<validate>validate-number validate-zero-or-greater</validate>-->
+                            <!--<sort_order>10</sort_order>-->
+                            <!--<show_in_default>1</show_in_default>-->
+                            <!--<show_in_website>1</show_in_website>-->
+                            <!--<show_in_store>0</show_in_store>-->
+                        <!--</insurance_amount>-->
+                        <max_weight translate="label">
+                            <label>Max weight</label>
+                            <comment>Max weight is 25</comment>
+                            <frontend_type>text</frontend_type>
+                            <validate>validate-number validate-zero-or-greater</validate>
+                            <sort_order>11</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_weight>
+                        <max_dimension_a translate="label">
+                            <label>Max dimension - size A</label>
+                            <comment>Size A</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>12</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_dimension_a>
+                        <max_dimension_b translate="label">
+                            <label>Max dimension - size B</label>
+                            <comment>Size B</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>13</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_dimension_b>
+                        <max_dimension_c translate="label">
+                            <label>Max dimension - size C</label>
+                            <comment>Size C</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>14</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </max_dimension_c>
+                        <!--<max_width translate="label">-->
+                            <!--<label>Max width</label>-->
+                            <!--<comment>Max width is 64</comment>-->
+                            <!--<frontend_type>text</frontend_type>-->
+                            <!--<validate>validate-number validate-zero-or-greater</validate>-->
+                            <!--<sort_order>10</sort_order>-->
+                            <!--<show_in_default>1</show_in_default>-->
+                            <!--<show_in_website>1</show_in_website>-->
+                            <!--<show_in_store>0</show_in_store>-->
+                        <!--</max_width>-->
+                        <!--<max_height translate="label">-->
+                            <!--<label>Max height</label>-->
+                            <!--<comment>Max height is 41</comment>-->
+                            <!--<frontend_type>text</frontend_type>-->
+                            <!--<validate>validate-number validate-zero-or-greater</validate>-->
+                            <!--<sort_order>11</sort_order>-->
+                            <!--<show_in_default>1</show_in_default>-->
+                            <!--<show_in_website>1</show_in_website>-->
+                            <!--<show_in_store>0</show_in_store>-->
+                        <!--</max_height>-->
+                        <!--<max_depth translate="label">-->
+                            <!--<label>Max depth</label>-->
+                            <!--<comment>Max depth is 38</comment>-->
+                            <!--<frontend_type>text</frontend_type>-->
+                            <!--<validate>validate-number validate-zero-or-greater</validate>-->
+                            <!--<sort_order>12</sort_order>-->
+                            <!--<show_in_default>1</show_in_default>-->
+                            <!--<show_in_website>1</show_in_website>-->
+                            <!--<show_in_store>0</show_in_store>-->
+                        <!--</max_depth>-->
+                        <specificerrmsg translate="label">
+                            <label>Displayed Error Message</label>
+                            <frontend_type>textarea</frontend_type>
+                            <sort_order>15</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </specificerrmsg>
+                        <sallowspecific translate="label">
+                            <label>Ship to Applicable Countries</label>
+                            <frontend_type>select</frontend_type>
+                            <sort_order>16</sort_order>
+                            <frontend_class>shipping-applicable-country</frontend_class>
+                            <source_model>adminhtml/system_config_source_shipping_allspecificcountries</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </sallowspecific>
+                        <specificcountry translate="label">
+                            <label>Ship to Specific Countries</label>
+                            <frontend_type>multiselect</frontend_type>
+                            <sort_order>17</sort_order>
+                            <source_model>adminhtml/system_config_source_country</source_model>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </specificcountry>
+                        <shop_cities translate="label">
+                            <label>Shop Cities</label>
+                            <comment>Shop Cities</comment>
+                            <frontend_type>text</frontend_type>
+                            <sort_order>18</sort_order>
+                            <show_in_default>1</show_in_default>
+                            <show_in_website>1</show_in_website>
+                            <show_in_store>0</show_in_store>
+                        </shop_cities>
+                    </fields>
+                </inpostparcels>
+            </groups>
+        </carriers>
+    </sections>
+</config>

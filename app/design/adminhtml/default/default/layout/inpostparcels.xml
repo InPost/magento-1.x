@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<layout>
+
+    <inpostparcels_adminhtml_inpostparcels_index>
+        <reference name="content">
+            <block type="inpostparcels/adminhtml_inpostparcels" name="inpostparcels"></block>
+        </reference>
+    </inpostparcels_adminhtml_inpostparcels_index>
+
+    <inpostparcels_adminhtml_inpostparcels_edit>
+        <reference name='head'>
+            <reference name="head">
+                <action method="addItem"><type>js</type><name>inpostparcels/jquery-1.6.4.min.js</name></action>
+                <!--<action method="addItem"><name>https://geowidget.inpost.co.uk/dropdown.php?dropdown_name=machine&field_to_update=name&field_to_update2=address&user_function=user_function</name></action>-->
+                <action method="addItem"><type>js</type><name>inpostparcels/noconflict.js</name></action>
+            </reference>
+        </reference>
+
+        <update handle="inpostparcels_parcels_edit"/>
+        <reference name="content">
+            <block type="adminhtml/template" name="parcels" template="inpostparcels/parcels_edit.phtml"/>
+        </reference>
+    </inpostparcels_adminhtml_inpostparcels_edit>
+
+</layout>

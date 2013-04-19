@@ -1,0 +1,259 @@
+<?xml version="1.0"?>
+<config>
+
+
+    <modules>
+        <Inpost_Inpostparcels>
+            <version>0.1.0</version>
+        </Inpost_Inpostparcels>
+    </modules>
+
+
+    <frontend>
+        <routers>
+            <inpostparcels>
+                <use>standard</use>
+                <args>
+                    <module>Inpost_Inpostparcels</module>
+                    <frontName>inpostparcels</frontName>
+                </args>
+            </inpostparcels>
+        </routers>
+
+        <translate>
+            <modules>
+                <Inpost_Inpostparcels>
+                    <files>
+                        <default>Inpost_Inpostparcels.csv</default>
+                    </files>
+                </Inpost_Inpostparcels>
+            </modules>
+        </translate>
+
+        <layout>
+            <updates>
+                <inpostparcels>
+                    <file>inpostparcels.xml</file>
+                </inpostparcels>
+            </updates>
+        </layout>
+    </frontend>
+
+
+    <global>
+
+        <events>
+            <checkout_controller_onepage_save_shipping_method>
+                <observers>
+                    <checkout_controller_onepage_save_shipping_method>
+                        <type>model</type>
+                        <class>inpostparcels/observer</class>
+                        <method>saveShippingMethod</method>
+                    </checkout_controller_onepage_save_shipping_method>
+                </observers>
+            </checkout_controller_onepage_save_shipping_method>
+
+            <sales_model_service_quote_submit_after>
+                <observers>
+                    <checkout_controller_onepage_save_shipping_method>
+                        <type>model</type>
+                        <class>inpostparcels/observer</class>
+                        <method>saveOrderAfter</method>
+                    </checkout_controller_onepage_save_shipping_method>
+                </observers>
+            </sales_model_service_quote_submit_after>
+
+            <sales_order_load_after>
+                <observers>
+                    <sales_order_load_after>
+                        <type>model</type>
+                        <class>inpostparcels/observer</class>
+                        <method>loadOrderAfter</method>
+                    </sales_order_load_after>
+                </observers>
+            </sales_order_load_after>
+
+            <sales_quote_load_after>
+                <observers>
+                    <sales_quote_load_after>
+                        <type>model</type>
+                        <class>inpostparcels/observer</class>
+                        <method>loadQuoteAfter</method>
+                    </sales_quote_load_after>
+                </observers>
+            </sales_quote_load_after>
+
+            <sales_order_shipment_save_after>
+                <observers>
+                    <sales_order_shipment_save_after>
+                        <type>model</type>
+                        <class>inpostparcels/observer</class>
+                        <method>salesOrderShipmentSaveAfter</method>
+                    </sales_order_shipment_save_after>
+                </observers>
+            </sales_order_shipment_save_after>
+
+        </events>
+
+        <models>
+            <sales>
+                <rewrite>
+                    <order>Inpost_Inpostparcels_Model_Sales_Order</order>
+                </rewrite>
+            </sales>
+
+            <inpostparcels>
+                <class>Inpost_Inpostparcels_Model</class>
+                <resourceModel>inpostparcels_mysql4</resourceModel>
+            </inpostparcels>
+
+            <inpostparcels_mysql4>
+                <class>Inpost_Inpostparcels_Model_Mysql4</class>
+                <entities>
+                    <inpostparcels>
+                        <table>order_shipping_inpostparcels</table>
+                    </inpostparcels>
+                </entities>
+            </inpostparcels_mysql4>
+        </models>
+
+        <resources>
+            <inpostparcels_setup>
+                <setup>
+                    <module>Inpost_Inpostparcels</module>
+                    <!--<class>Mage_Sales_Model_Mysql4_Setup</class>-->
+                </setup>
+                <connection>
+                    <use>core_setup</use>
+                </connection>
+            </inpostparcels_setup>
+            <inpostparcels_write>
+                <connection>
+                    <use>core_write</use>
+                </connection>
+            </inpostparcels_write>
+            <inpostparcels_read>
+                <connection>
+                    <use>core_read</use>
+                </connection>
+            </inpostparcels_read>
+        </resources>
+
+        <blocks>
+            <inpostparcels>
+                <class>Inpost_Inpostparcels_Block</class>
+            </inpostparcels>
+        </blocks>
+
+        <helpers>
+            <inpostparcels>
+                <class>Inpost_Inpostparcels_Helper</class>
+            </inpostparcels>
+        </helpers>
+    </global>
+
+
+    <default>
+        <carriers>
+            <inpostparcels>
+                <active>1</active>
+                <model>inpostparcels/carrier_inpostparcels</model>
+                <title>InPost Parcel Lockers 24/7</title>
+                <name>InPost Parcel Lockers 24/7</name>
+                <api_url>API_URL</api_url>
+                <max_weight>25</max_weight>
+                <max_dimension_a>8x38x64</max_dimension_a>
+                <max_dimension_b>19x38x64</max_dimension_b>
+                <max_dimension_c>41x38x64</max_dimension_c>
+                <!--<max_height>41</max_height>-->
+                <!--<max_depth>38</max_depth>-->
+                <!--<max_width>64</max_width>-->
+                <price>14</price>
+                <!--<sallowspecific>1</sallowspecific>-->
+                <!--<specificcountry>UK</specificcountry>-->
+                <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+            </inpostparcels>
+        </carriers>
+    </default>
+
+
+    <admin>
+        <routers>
+            <inpostparcels>
+                <use>admin</use>
+                <args>
+                    <module>Inpost_Inpostparcels</module>
+                    <frontName>inpostparcels</frontName>
+                </args>
+            </inpostparcels>
+        </routers>
+    </admin>
+
+
+    <adminhtml>
+        <acl>
+            <resources>
+                <admin>
+                    <children>
+                        <system>
+                            <children>
+                                <config>
+                                    <children>
+                                        <inpostparcels translate="title" module="inpostparcels">
+                                            <title>Inpostparcels Settings</title>
+                                        </inpostparcels>
+                                    </children>
+                                </config>
+                            </children>
+                        </system>
+                    </children>
+
+                    <children>
+                        <sales>
+                            <children>
+                                <inpostparcels_adminform>
+                                    <title>Inpostparcels/Parcels</title>
+                                </inpostparcels_adminform>
+                            </children>
+                        </sales>
+                    </children>
+
+                </admin>
+            </resources>
+        </acl>
+
+        <menu>
+            <sales>
+                <children>
+                    <inpost translate="title" module="inpostparcels">
+                        <title>InPost Parcel Lockers 24/7</title>
+                        <sort_order>31</sort_order>
+                        <action>inpostparcels/adminhtml_inpostparcels</action>
+                    </inpost>
+                </children>
+            </sales>
+        </menu>
+
+        <translate>
+            <modules>
+                <inpostparcels>
+                    <files>
+                        <default>Inpost_Inpostparcels.csv</default>
+                    </files>
+                </inpostparcels>
+            </modules>
+        </translate>
+
+        <layout>
+            <updates>
+                <inpostparcels>
+                    <file>inpostparcels.xml</file>
+                </inpostparcels>
+            </updates>
+        </layout>
+
+    </adminhtml>
+
+
+
+</config>

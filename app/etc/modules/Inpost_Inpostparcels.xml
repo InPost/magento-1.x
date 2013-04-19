@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<config>
+	<modules>
+		<Inpost_Inpostparcels>
+			<active>true</active>
+			<codePool>local</codePool>
+		</Inpost_Inpostparcels>
+	</modules>
+</config>
