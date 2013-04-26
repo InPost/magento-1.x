@@ -6,12 +6,20 @@
 
     //Mage::log(var_export($_SESSION, 1) . '------', null, 'session.log');
 
+    $machine_params = array();
+    switch(Mage::helper('inpostparcels/data')->getCurrentApi()){
+        case 'PL':
+            $machine_params['payment_available'] = true;
+            break;
+        case 'UK':
+            break;
+    }
+
     $allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
         array(
             'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
             'methodType' => 'GET',
-            'params' => array(
-            )
+            'params' => $machine_params
         )
     );
 

@@ -212,4 +212,23 @@ class Inpost_Inpostparcels_Helper_Data extends Mage_Core_Helper_Abstract
         return $currentApi;
     }
 
+    public static function getVersion(){
+        return '1.0.0';
+    }
+
+    public static function getGeowidgetUrl(){
+
+        switch(self::getCurrentApi()){
+            case 'UK':
+                return 'https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function';
+                break;
+
+            case 'PL':
+                return 'https://geowidget.inpost.pl/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function';
+                break;
+        }
+
+    }
+
+
 }

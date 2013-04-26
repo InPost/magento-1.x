@@ -61,7 +61,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </api_key>
-                        <desc translate="label">
+                        <desc translate="label comment">
                             <label>Description</label>
                             <comment>Description shown to customer</comment>
                             <frontend_type>textarea</frontend_type>
@@ -97,7 +97,7 @@
                             <!--<show_in_website>1</show_in_website>-->
                             <!--<show_in_store>0</show_in_store>-->
                         <!--</insurance_amount>-->
-                        <max_weight translate="label">
+                        <max_weight translate="label comment">
                             <label>Max weight</label>
                             <comment>Max weight is 25</comment>
                             <frontend_type>text</frontend_type>
@@ -107,7 +107,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </max_weight>
-                        <max_dimension_a translate="label">
+                        <max_dimension_a translate="label comment">
                             <label>Max dimension - size A</label>
                             <comment>Size A</comment>
                             <frontend_type>text</frontend_type>
@@ -116,7 +116,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </max_dimension_a>
-                        <max_dimension_b translate="label">
+                        <max_dimension_b translate="label comment">
                             <label>Max dimension - size B</label>
                             <comment>Size B</comment>
                             <frontend_type>text</frontend_type>
@@ -125,7 +125,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </max_dimension_b>
-                        <max_dimension_c translate="label">
+                        <max_dimension_c translate="label comment">
                             <label>Max dimension - size C</label>
                             <comment>Size C</comment>
                             <frontend_type>text</frontend_type>
@@ -191,7 +191,7 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </specificcountry>
-                        <shop_cities translate="label">
+                        <shop_cities translate="label comment">
                             <label>Shop Cities</label>
                             <comment>Shop Cities</comment>
                             <frontend_type>text</frontend_type>

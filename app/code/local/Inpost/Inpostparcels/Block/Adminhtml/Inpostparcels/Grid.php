@@ -95,6 +95,7 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
                 'sortable'  => false,
                 'index'     => 'id',
                 'is_system' => true,
+                'renderer'  => new Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Renderer_Link()
         ));
 
         //$this->addExportType('*/*/exportCsv', Mage::helper('inpostparcels')->__('CSV'));

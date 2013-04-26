@@ -155,7 +155,7 @@
 
     <default>
         <carriers>
-            <inpostparcels>
+            <inpostparcels translate="title name api_url specificerrmsg">
                 <active>1</active>
                 <model>inpostparcels/carrier_inpostparcels</model>
                 <title>InPost Parcel Lockers 24/7</title>

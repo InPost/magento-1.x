@@ -314,6 +314,12 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
             $machines = array();
             if(is_array(@$allMachines['result']) && !empty($allMachines['result'])){
                 foreach($allMachines['result'] as $key => $machine){
+                    if(in_array($parcel->getApiSource(), array('PL'))){
+                        if($machine->payment_available == false){
+                            continue;
+                        }
+                    }
+
                     $parcelTargetAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
                     $parcelTargetAllMachinesDetail[$machine->id] = array(
                         'id' => $machine->id,
@@ -368,9 +374,9 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 
                     if(isset($api['result']) && !empty($api['result'])){
                         $parcelInsurancesAmount = array(
-                            'insurance_price1' => $api['result']->insurance_price1,
-                            'insurance_price2' => $api['result']->insurance_price2,
-                            'insurance_price3' => $api['result']->insurance_price3
+                            ''.$api['result']->insurance_price1.'' => $api['result']->insurance_price1,
+                            ''.$api['result']->insurance_price2.'' => $api['result']->insurance_price2,
+                            ''.$api['result']->insurance_price3.'' => $api['result']->insurance_price3
                         );
                     }
 
@@ -414,6 +420,10 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
                         }
                     }else{
                         $defaultTargetMachine = $this->__('no terminals in your city');
+                        if(@$parcelDetailDb->source_machine != ''){
+                            $parcelSourceMachinesId[$parcelDetailDb->source_machine] = @$parcelSourceAllMachinesId[$parcelDetailDb->source_machine];
+                            $parcelSourceMachinesDetail[$parcelDetailDb->source_machine] = @$parcelSourceMachinesDetail[$parcelDetailDb->source_machine];
+                        }
                     }
 
                     Mage::register('parcelSourceMachinesId', $parcelSourceMachinesId);
@@ -484,7 +494,7 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
                         'methodType' => 'POST',
                         'params' => array(
                             'description' => @$postData['parcel_description'],
-                            'description2' => 'magento-1.x',
+                            'description2' => 'magento-1.x-'.Mage::helper('inpostparcels/data')->getVersion(),
                             'receiver' => array(
                                 'phone' => @$postData['parcel_receiver_phone'],
                                 'email' => @$postData['parcel_receiver_email']
@@ -500,7 +510,7 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
                             $insurance_amount = Mage::getSingleton('adminhtml/session')->getParcelInsuranceAmount();
                             $params['params']['cod_amount'] = @$postData['parcel_cod_amount'];
                             if(@$postData['parcel_insurance_amount'] != ''){
-                                $params['params']['insurance_amount'] = @$insurance_amount[@$postData['parcel_insurance_amount']];
+                                $params['params']['insurance_amount'] = @$postData['parcel_insurance_amount'];
                             }
                             $params['params']['source_machine'] = @$postData['parcel_source_machine_id'];
                             break;
