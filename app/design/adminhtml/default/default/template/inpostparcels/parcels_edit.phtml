@@ -190,6 +190,7 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                 );
             });
         });
+        <?php if(in_array(Mage::registry('api_source'), array('PL'))): ?>
         jQuery('input[type="checkbox"][name="show_all_machines_source"]').click(function(){
             var machines_list_type = jQuery(this).is(':checked');
 
@@ -218,5 +219,6 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                 );
             });
         });
+        <?php endif ?>
     });
 </script>

@@ -59,8 +59,8 @@ class Inpost_Inpostparcels_Model_Carrier_Inpostparcels  extends Mage_Shipping_Mo
             $method->setCarrier($this->_code);
             $method->setMethod($this->_code);
             $method->setCarrierTitle($this->getConfigData('title'));
-            //$method->setMethodTitle($this->getConfigData('name'));
-            $method->setMethodTitle('Price');
+            $method->setMethodTitle($this->getConfigData('name'));
+            //$method->setMethodTitle('Price');
             $method->setMethodDescription($this->getConfigData('desc'));
             $method->setPrice($this->getConfigData('price'));
             $method->setCost($this->getConfigData('price'));
