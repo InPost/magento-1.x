@@ -17,6 +17,11 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
     {
         $collection = Mage::getModel('inpostparcels/inpostparcels')->getCollection();
         //$collection->addAttributeToFilter('parcel_id', array('notnull' => true));
+        $collection->getSelect()->joinLeft(
+            array('sfo' => 'sales_flat_order'),
+            'sfo.entity_id=order_id'
+        );
+
         $this->setCollection($collection);
         return parent::_prepareCollection();
     }
@@ -31,10 +36,10 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
             'type'  => 'number'
         ));
 
-        $this->addColumn('order_id', array(
+        $this->addColumn('increment_id', array(
             'header'    => Mage::helper('inpostparcels')->__('Order ID'),
             'width'     => '10px',
-            'index'     => 'order_id',
+            'index'     => 'increment_id',
             'width'     => '10px',
         ));
 
