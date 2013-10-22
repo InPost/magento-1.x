@@ -26,6 +26,9 @@
     $parcelTargetAllMachinesId = array();
     $parcelTargetAllMachinesDetail = array();
     $machines = array();
+    $machines_post_code = array();
+    $machines_city = array();
+
     if(is_array(@$allMachines['result']) && !empty($allMachines['result'])){
         foreach($allMachines['result'] as $key => $machine){
             $parcelTargetAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
@@ -41,16 +44,21 @@
                 )
             );
             if($machine->address->post_code == $this->getQuote()->getShippingAddress()->getPostcode()){
-                $machines[$key] = $machine;
-                continue;
+                $machines_post_code[$key] = $machine;
             }elseif($machine->address->city == $this->getQuote()->getShippingAddress()->getCity()){
-                $machines[$key] = $machine;
+                $machines_city[$key] = $machine;
             }
         }
         Mage::getSingleton('checkout/session')->setParcelTargetAllMachinesDetail($parcelTargetAllMachinesDetail);
+
+        if(!empty($machines_post_code)){
+            $machines = $machines_post_code;
+        }else{
+            $machines = $machines_city;
+        }
     }
 
-    //Mage::log(var_export($machines, 1) . '------', null, 'machines.log');
+    //Mage::log(var_export($allMachines, 1) . '------', null, 'machines.log');
     //Mage::log(var_export($allMachines, 1) . '------', null, 'all_machines.log');
 
     $parcelTargetMachinesId = array();
@@ -83,7 +91,7 @@
     }
 
 ?>
-<ul class="form-list" id="shipping_form_<?php echo $_rate->getCode() ?>" style="display:none;">
+<ul class="form-list" id="shipping_form_<?php echo $_rate->getCode() ?>" style="display">
     <li>
         <!--<label for="--><?php //echo @$_code ?><!--_target_box_machine" class="required"><em>*</em>--><?php //echo $this->__('Choose Target Box Machine:') ?><!--</label>-->
         <span class="input-box">
@@ -141,6 +149,15 @@ jQuery(document).ready(function(){
             );
         });
     });
+
+    jQuery('input[type="radio"][name="shipping_method"]').click(function(){
+        if(jQuery("#s_method_inpostparcels_inpostparcels").is(":checked")){
+            jQuery("#shipping_form_inpostparcels_inpostparcels").css("display");
+        }else{
+            jQuery("#shipping_form_inpostparcels_inpostparcels").css("display","none");
+        }
+    });
+
 });
 
 
