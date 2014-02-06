@@ -17,7 +17,7 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
     }
 
     public function massStickersAction()
-    {        
+    {
         $parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
         $countSticker = 0;
         $countNonSticker = 0;
@@ -28,6 +28,14 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 
         foreach ($parcelsIds as $id) {
             $parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
+            $orderCollection = Mage::getResourceModel('sales/order_grid_collection')
+                ->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
+                ->getFirstItem();
+
+            if($orderCollection->getStatus() != 'processing'){
+                continue;
+            }
+
             if($parcelCollection->getParcelId() != ''){
                 $parcelsCode[$id] = $parcelCollection->getParcelId();
                 if($parcelCollection->getStickerCreationDate() == ''){
