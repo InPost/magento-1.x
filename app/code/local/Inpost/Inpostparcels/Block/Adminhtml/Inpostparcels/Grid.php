@@ -50,8 +50,16 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
             'width'     => '10px',
         ));
 
+        $this->addColumn('status', array(
+            'header' => Mage::helper('sales')->__('Order Status'),
+            'index' => 'status',
+            'type'  => 'options',
+            'width' => '70px',
+            'options' => Mage::getSingleton('sales/order_config')->getStatuses(),
+        ));
+
         $this->addColumn('parcel_status', array(
-            'header'    =>  Mage::helper('inpostparcels')->__('Status'),
+            'header'    =>  Mage::helper('inpostparcels')->__('Parcel Status'),
             'width'     =>  '10px',
             'index'     =>  'parcel_status',
             'type'      =>  'options',
