@@ -134,6 +134,11 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
             'url'      => $this->getUrl('*/*/massRefreshStatus')
         ));
 
+        $this->getMassactionBlock()->addItem('parcels', array(
+            'label'    => Mage::helper('inpostparcels')->__('Create multiple parcels'),
+            'url'      => $this->getUrl('*/*/massCreateMultipleParcels')
+        ));
+
         $this->getMassactionBlock()->addItem('cancel', array(
             'label'    => Mage::helper('inpostparcels')->__('Cancel'),
             'url'      => $this->getUrl('*/*/massCancel'),

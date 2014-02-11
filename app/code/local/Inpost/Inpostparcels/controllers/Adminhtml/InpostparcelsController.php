@@ -251,6 +251,108 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
         $this->_redirect('*/*/');
     }
 
+    public function massCreateMultipleParcelsAction(){
+        $parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
+        $countParcel = 0;
+        $countNonParcel = 0;
+
+        $parcels = array();
+
+        foreach ($parcelsIds as $id) {
+            $parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
+            $orderCollection = Mage::getResourceModel('sales/order_grid_collection')
+                ->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
+                ->getFirstItem();
+
+            if($orderCollection->getStatus() != 'processing' || $parcelCollection->getParcelId() != ''){
+                $countNonParcel++;
+                continue;
+            }
+            //$parcelTargetMachineDetailDb = json_decode($parcelCollection->getParcelTargetMachineDetail());
+            $parcelDetailDb = json_decode($parcelCollection->getParcelDetail());
+
+            // create Inpost parcel e.g.
+            $params = array(
+                'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels',
+                'methodType' => 'POST',
+                'params' => array(
+                    'description' => $parcelDetailDb->description,
+                    'description2' => 'magento-1.x-'.Mage::helper('inpostparcels/data')->getVersion(),
+                    'receiver' => array(
+                        'phone' => $parcelDetailDb->receiver->phone,
+                        'email' => $parcelDetailDb->receiver->email,
+                    ),
+                    'size' => $parcelDetailDb->size,
+                    'tmp_id' => $parcelDetailDb->tmp_id,
+                    'target_machine' => $parcelDetailDb->target_machine
+                )
+            );
+
+            switch($parcelCollection->getApiSource()){
+                case 'PL':
+                    /*
+                    $insurance_amount = Mage::getSingleton('adminhtml/session')->getParcelInsuranceAmount();
+                    $params['params']['cod_amount'] = @$postData['parcel_cod_amount'];
+                    if(@$postData['parcel_insurance_amount'] != ''){
+                        $params['params']['insurance_amount'] = @$postData['parcel_insurance_amount'];
+                    }
+                    $params['params']['source_machine'] = @$postData['parcel_source_machine_id'];
+                    break;
+                    */
+            }
+
+            $parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels($params);
+
+            if(@$parcelApi['info']['http_code'] != '204' && @$parcelApi['info']['http_code'] != '201'){
+                if(!empty($parcelApi['result'])){
+                    foreach(@$parcelApi['result'] as $key => $error){
+                        if(is_array($error)){
+                            foreach($error as $subKey => $subError){
+                                $this->_getSession()->addError($this->__('Parcel %s '.$subError, $key.' '.$id));
+                            }
+                        }else{
+                            $this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
+                        }
+                    }
+                }
+                $countNonParcel++;
+
+            }else{
+                $fields = array(
+                    'parcel_id' => $parcelApi['result']->id,
+                    'parcel_status' => 'Created',
+                    'parcel_detail' => json_encode($params['params']),
+                    'parcel_target_machine_id' => isset($postData['parcel_target_machine_id'])?$postData['parcel_target_machine_id']:$parcelCollection->getParcelTargetMachineId(),
+                    'parcel_target_machine_detail' => $parcelCollection->getParcelTargetMachineDetail(),
+                    'variables' => json_encode(array())
+                );
+
+                $parcelCollection->setParcelId($fields['parcel_id']);
+                $parcelCollection->setParcelStatus($fields['parcel_status']);
+                $parcelCollection->setParcelDetail($fields['parcel_detail']);
+                $parcelCollection->setParcelTargetMachineId($fields['parcel_target_machine_id']);
+                $parcelCollection->setParcelTargetMachineDetail($fields['parcel_target_machine_detail']);
+                $parcelCollection->setVariables($fields['variables']);
+                $parcelCollection->save();
+                $countParcel++;
+            }
+        }
+
+        if ($countNonParcel) {
+            if ($countNonParcel) {
+                $this->_getSession()->addError($this->__('%s parcel(s) cannot be created', $countNonParcel));
+            } else {
+                $this->_getSession()->addError($this->__('The parcel(s) cannot be created'));
+            }
+        }
+        if ($countParcel) {
+            $this->_getSession()->addSuccess($this->__('%s parcel(s) have been created.', $countParcel));
+        }
+
+        $this->_redirect('*/*/');
+
+    }
+
     public function editAction(){
         $id = $this->getRequest()->getParam('id');
         $parcel = Mage::getModel('inpostparcels/inpostparcels')->load($id);
