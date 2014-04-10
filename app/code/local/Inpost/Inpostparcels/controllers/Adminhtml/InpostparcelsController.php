@@ -32,9 +32,9 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
                 ->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
                 ->getFirstItem();
 
-            if($orderCollection->getStatus() != 'processing'){
-                continue;
-            }
+//            if($orderCollection->getStatus() != 'processing'){
+//                continue;
+//            }
 
             if($parcelCollection->getParcelId() != ''){
                 $parcelsCode[$id] = $parcelCollection->getParcelId();
