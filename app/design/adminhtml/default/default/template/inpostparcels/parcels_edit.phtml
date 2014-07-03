@@ -44,38 +44,38 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
 <div class="content-header">
     <table cellspacing="0" class="grid-header">
         <tr>
-            <td><h3><?=$this->__('Edit parcel')?></h3></td>
+            <td><h3><?php echo $this->__('Edit parcel'); ?></h3></td>
             <td class="a-right">
                 <button onclick="history.back();" class="button" title="<?php echo $this->__('Back') ?>" type="button"><span><span><?php echo $this->__('Back') ?></span></span></button>
-                <button onclick="editForm.submit()" class="scalable save" type="button"><span><?=$this->__('Parcel update') ?></span></button>
+                <button onclick="editForm.submit()" class="scalable save" type="button"><span><?php echo $this->__('Parcel update'); ?></span></button>
             </td>
         </tr>
     </table>
 </div>
 <div class="entry-edit">
-    <form id="edit_form" name="edit_form" method="post" action="<?=$this->getUrl('*/*/save')?>">
+    <form id="edit_form" name="edit_form" method="post" action="<?php echo $this->getUrl('*/*/save'); ?>">
         <input type="hidden" name="parcel_id" value="<?php echo $inpostparcelsData['parcel_id']; ?>" />
         <input type="hidden" name="id" value="<?php echo $inpostparcelsData['id']; ?>" />
         <input name="form_key" type="hidden" value="<?php echo Mage::getSingleton('core/session')->getFormKey() ?>" />
-        <h4 class="icon-head head-edit-form fieldset-legend"><?=$this->__('Parcel detail')?></h4>
+        <h4 class="icon-head head-edit-form fieldset-legend"><?php echo $this->__('Parcel detail'); ?></h4>
         <fieldset id="my-fieldset">
             <table cellspacing="0" class="form-list">
 
                 <?php if(in_array(Mage::registry('api_source'), array('PL'))): ?>
                 <tr>
-                    <td class="label"><?=$this->__('Cod amount')?>:</td>
+                    <td class="label"><?php echo $this->__('Cod amount'); ?>:</td>
                     <td class="input-ele"><input class="input-text" name="parcel_cod_amount" value="<?php echo $inpostparcelsData['parcel_cod_amount']; ?>" <?php echo Mage::registry('disabledCodAmount'); ?> <?php ?>/></td>
                 </tr>
                 <?php endif; ?>
 
                 <tr>
-                    <td class="label"><?=$this->__('Description')?>:</td>
+                    <td class="label"><?php echo $this->__('Description'); ?>:</td>
                     <td class="input-ele"><textarea class="input-text required-entry" name="parcel_description" rows="10" cols="50" <?php echo Mage::registry('disabledDescription'); ?>><?php echo $inpostparcelsData['parcel_description']; ?></textarea></td>
                 </tr>
 
                 <?php if(in_array(Mage::registry('api_source'), array('PL'))): ?>
                 <tr>
-                    <td class="label"><?=$this->__('Insurance amount')?>:</td>
+                    <td class="label"><?php echo $this->__('Insurance amount'); ?>:</td>
                     <td class="input-ele">
                         <select class="input-text" id="parcel_size" name="parcel_insurance_amount" <?php echo Mage::registry('disabledInsuranceAmount'); ?>>
                             <option value='' <?php if(@$inpostparcelsData['parcel_insurance_amount'] == ''){ echo "selected=selected";} ?>><?php echo Mage::registry('defaultInsuranceAmount'); ?></option>
@@ -88,37 +88,37 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                 <?php endif; ?>
 
                 <tr>
-                    <td class="label"><?=$this->__('Receiver phone')?>:<span class="required">*</span></td>
+                    <td class="label"><?php echo $this->__('Receiver phone'); ?>:<span class="required">*</span></td>
                     <td class="input-ele"><input class="input-text required-entry" name="parcel_receiver_phone" value="<?php echo $inpostparcelsData['parcel_receiver_phone']; ?>" <?php echo Mage::registry('disabledReceiverPhone'); ?>/></td>
                 </tr>
 
                 <tr>
-                    <td class="label"><?=$this->__('Receiver email')?>:<span class="required">*</span></td>
+                    <td class="label"><?php echo $this->__('Receiver email'); ?>:<span class="required">*</span></td>
                     <td class="input-ele"><input class="input-text required-entry" name="parcel_receiver_email" value="<?php echo $inpostparcelsData['parcel_receiver_email']; ?>" <?php echo Mage::registry('disabledReceiverEmail'); ?>/></td>
                 </tr>
 
                 <tr>
-                    <td class="label"><?=$this->__('Parcel size')?> <span class="required">*</span></td>
+                    <td class="label"><?php echo $this->__('Parcel size'); ?> <span class="required">*</span></td>
                     <td class="input-ele">
                         <select class="required-entry" id="parcel_size" name="parcel_size" <?php echo Mage::registry('disabledParcelSize'); ?>>
                             <option value='' <?php if($inpostparcelsData['parcel_size'] == ''){ echo "selected=selected";} ?>><?php echo Mage::registry('defaultParcelSize');?></option>
-                            <option value='<?=$this->__('A')?>' <?php if($inpostparcelsData['parcel_size'] == $this->__('A')){ echo "selected=selected";} ?>><?=$this->__('A')?></option>
-                            <option value='<?=$this->__('B')?>' <?php if($inpostparcelsData['parcel_size'] == $this->__('B')){ echo "selected=selected";} ?>><?=$this->__('B')?></option>
-                            <option value='<?=$this->__('C')?>' <?php if($inpostparcelsData['parcel_size'] == $this->__('C')){ echo "selected=selected";} ?>><?=$this->__('C')?></option>
+                            <option value='<?php echo $this->__('A'); ?>' <?php if($inpostparcelsData['parcel_size'] == $this->__('A')){ echo "selected=selected";} ?>><?php echo $this->__('A'); ?></option>
+                            <option value='<?php echo $this->__('B'); ?>' <?php if($inpostparcelsData['parcel_size'] == $this->__('B')){ echo "selected=selected";} ?>><?php echo $this->__('B'); ?></option>
+                            <option value='<?php echo $this->__('C'); ?>' <?php if($inpostparcelsData['parcel_size'] == $this->__('C')){ echo "selected=selected";} ?>><?php echo $this->__('C'); ?></option>
                         </select>
                     </td>
                 </tr>
 
                 <?php if($inpostparcelsData['parcel_status'] != ''): ?>
                 <tr>
-                    <td class="label"><?=$this->__('Status')?>:<span class="required">*</span></td>
+                    <td class="label"><?php echo $this->__('Status'); ?>:<span class="required">*</span></td>
                     <td class="input-ele"><input class="input-text required-entry" name="parcel_status" value="<?php echo $inpostparcelsData['parcel_status']; ?>" <?php echo Mage::registry('disabledParcelStatus'); ?>/></td>
                 </tr>
                 <?php endif; ?>
 
                 <?php if(in_array(Mage::registry('api_source'), array('PL'))): ?>
                 <tr>
-                    <td class="label"><?=$this->__('Source machine')?>:</td>
+                    <td class="label"><?php echo $this->__('Source machine'); ?>:</td>
                     <td class="input-ele">
                         <select id="shipping_inpostparcels_source" name="parcel_source_machine_id" <?php echo Mage::registry('disabledSourceMachine'); ?>>
                             <option value='' <?php if(@$inpostparcelsData['parcel_source_machine_id'] == ''){ echo "selected=selected";} ?>><?php echo Mage::registry('defaultSourceMachine');?></option>
@@ -126,19 +126,19 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                             <option value='<?php echo $key ?>' <?php if($inpostparcelsData['parcel_source_machine_id'] == $key){ echo "selected=selected";} ?>><?php echo $parcelSourceMachine;?></option>
                             <?php endforeach; ?>
                         </select>
-                        <a href="#" onclick="openMap('source_machine'); return false;"><?=$this->__('Map') ?></a>
-                        &nbsp|&nbsp<input type="checkbox" name="show_all_machines_source" <?php echo Mage::registry('disabledSourceMachine'); ?>> <?=$this->__('Show terminals in other cities') ?>
+                        <a href="#" onclick="openMap('source_machine'); return false;"><?php echo $this->__('Map'); ?></a>
+                        &nbsp;|&nbsp;<input type="checkbox" name="show_all_machines_source" <?php echo Mage::registry('disabledSourceMachine'); ?>> <?php echo $this->__('Show terminals in other cities'); ?>
                     </td>
                 </tr>
                 <?php endif; ?>
 
                 <tr>
-                    <td class="label"><?=$this->__('Tmp id')?>:<span class="required">*</span></td>
+                    <td class="label"><?php echo $this->__('Tmp id'); ?>:<span class="required">*</span></td>
                     <td class="input-ele"><input class="input-text required-entry" name="parcel_tmp_id" value="<?php echo $inpostparcelsData['parcel_tmp_id']; ?>" <?php echo Mage::registry('disabledTmpId'); ?>/></td>
                 </tr>
 
                 <tr>
-                    <td class="label"><?=$this->__('Target machine')?>:<span class="required">*</span></td>
+                    <td class="label"><?php echo $this->__('Target machine'); ?>:<span class="required">*</span></td>
                     <td class="input-ele">
                         <select id="shipping_inpostparcels" name="parcel_target_machine_id" <?php echo Mage::registry('disabledTargetMachine'); ?>>
                             <option value='' <?php if(@$inpostparcelsData['parcel_target_machine_id'] == ''){ echo "selected=selected";} ?>><?php echo Mage::registry('defaultTargetMachine');?></option>
@@ -149,8 +149,8 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                         <input type="hidden" id="name" name="name" disabled="disabled" />
                         <input type="hidden" id="box_machine_town" name="box_machine_town" disabled="disabled" />
                         <input type="hidden" id="address" name="address" disabled="disabled" />
-                        <a href="#" onclick="openMap('target_machine'); return false;"><?=$this->__('Map') ?></a>
-                        &nbsp|&nbsp<input type="checkbox" name="show_all_machines" <?php echo Mage::registry('disabledTargetMachine'); ?>> <?=$this->__('Show terminals in other cities') ?>
+                        <a href="#" onclick="openMap('target_machine'); return false;"><?php echo $this->__('Map'); ?></a>
+                        &nbsp;|&nbsp;<input type="checkbox" name="show_all_machines" <?php echo Mage::registry('disabledTargetMachine'); ?>> <?php echo $this->__('Show terminals in other cities'); ?>
                     </td>
                 </tr>
 
