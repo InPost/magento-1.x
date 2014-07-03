@@ -62,7 +62,7 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
         if(isset($inpostparcels[$quote_id])){
 			$data = $inpostparcels[$quote_id];
 			$data['order_id'] = $order->getId();
-            $data['parcel_detail']['description'] = 'Order number:'.$order->getId();
+            $data['parcel_detail']['description'] = 'Order number:'.$order->getIncrementId();
             switch (Mage::helper('inpostparcels/data')->getCurrentApi()){
                 case 'PL':
                     $data['parcel_detail']['cod_amount'] = (Mage::getSingleton('checkout/session')->getQuote()->getPayment()->getMethodInstance()->getCode() == 'checkmo')? sprintf("%.2f" ,$order->getGrandTotal()) : '';
