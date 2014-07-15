@@ -18,7 +18,7 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
         $collection = Mage::getModel('inpostparcels/inpostparcels')->getCollection();
         //$collection->addAttributeToFilter('parcel_id', array('notnull' => true));
         $collection->getSelect()->join(
-            array('sfo' => 'sales_flat_order'),
+            array('sfo' => $collection->getTable('sales/order')),
             'sfo.entity_id=order_id'
         );
 
