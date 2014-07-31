@@ -12,7 +12,7 @@
             $machine_params['payment_available'] = true;
             break;
         case 'UK':
-            $machine_params['status'] =Operating;
+            $machine_params['status'] = 'Operating';
             break;
     }
 
@@ -44,9 +44,16 @@
                     'city' => @$machine->address->city
                 )
             );
-            if($machine->address->post_code == $this->getQuote()->getShippingAddress()->getPostcode()){
+
+	    //-------------------------------------------------------------
+	    // Make sure we use binary safe and Case insensitive compare!!!
+	    //-------------------------------------------------------------
+	    if(strcasecmp($machine->address->post_code, $this->getQuote()->getShippingAddress()->getPostcode()) == 0)
+	    {
                 $machines_post_code[$key] = $machine;
-            }elseif($machine->address->city == $this->getQuote()->getShippingAddress()->getCity()){
+	    }
+	    elseif(strcasecmp($machine->address->city, $this->getQuote()->getShippingAddress()->getCity()) == 0)
+	    {
                 $machines_city[$key] = $machine;
             }
         }

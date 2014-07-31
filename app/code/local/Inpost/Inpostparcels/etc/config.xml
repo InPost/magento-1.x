@@ -4,7 +4,7 @@
 
     <modules>
         <Inpost_Inpostparcels>
-            <version>0.1.1</version>
+            <version>0.1.2</version>
         </Inpost_Inpostparcels>
     </modules>
 
@@ -92,6 +92,18 @@
                     </sales_order_shipment_save_after>
                 </observers>
             </sales_order_shipment_save_after>
+	    <!-- PayPal express change SN -->
+            <sales_quote_save_before>
+               <!-- Event Called Before Quote Object is saved -->
+               <observers>
+                  <save_before>
+                     <type>singleton</type>
+                     <class>inpostparcels/observer</class>
+                     <method>saveQuoteBefore</method>
+                  </save_before>
+               </observers>
+            </sales_quote_save_before>
+	    <!-- PayPal express change EN -->
 
         </events>
 

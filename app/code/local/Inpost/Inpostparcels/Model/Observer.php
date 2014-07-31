@@ -49,6 +49,16 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
         }
 	}
 
+	///
+	// saveOrderAfter
+	//
+	// NB The following code uses a mix of
+	// $order->getId()
+	// and
+	// $order->getIncrementId()
+	//
+	// It is very impostant that the calls are in the correct places.
+	//
 	public function saveOrderAfter($evt){
         if(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod() != 'inpostparcels_inpostparcels'){
             return;
@@ -78,6 +88,64 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
             $inpostparcelsModel->save();
             //Mage::log(var_export($data, 1) . '------', null, 'save_order_after.log');
 		}
+		// PayPal change SN
+		else
+		{
+			// We don't have the standard one-page checkout data
+			// but we might have the review page data.
+			if($quote->getInpostparcelsData())
+			{
+				$var = $quote->getInpostparcelsData();
+
+				//Mage::log('Order = ' . $order->getIncrementId() .
+					//' quote = ' . $quote->getId());
+
+				$data['parcel_detail'] = array(
+					'description' => 'Order Number:' .
+						$order->getIncrementId(),
+						//$order->getId(),
+					'receiver' => array(
+						'email' => $var['parcel_receiver_email'],
+						'phone' => $var['parcel_receiver_phone']
+					),
+					'size' => Mage::getSingleton('checkout/session')->getParcelSize(),
+					'tmp_id' => Mage::helper('inpostparcels/data')->generate(4, 15),
+					'target_machine' => $var['parcel_source_machine_id']
+				);
+
+				switch (Mage::helper('inpostparcels/data')->getCurrentApi())
+				{
+					case 'PL':
+					$data['parcel_detail']['cod_amount'] = (Mage::getSingleton('checkout/session')->getQuote()->getPayment()->getMethodInstance()->getCode() == 'checkmo')? sprintf("%.2f" ,$order->getGrandTotal()) : '';
+					break;
+				}
+				
+				$inpostparcelsModel = Mage::getModel('inpostparcels/inpostparcels');
+
+				// Build the Machine Details information
+				$machine_details['id'] = $var['parcel_source_machine_id'];
+				$machine_bits = explode(';', 
+					$var['parcel_receiver_details']);
+
+				$machine_details['address'] = array(
+					'building_number' => $machine_bits[2],
+					'flat_number'     => '',
+					'post_code'       => '',
+					'province'        => '',
+					'street'          => $machine_bits[1],
+					'city'            => $machine_bits[0],
+				);
+
+				//$inpostparcelsModel->setId($order->getId());
+				$inpostparcelsModel->setOrderId($order->getId());
+				$inpostparcelsModel->setParcelDetail(json_encode($data['parcel_detail']));
+				$inpostparcelsModel->setParcelTargetMachineId($var['parcel_source_machine_id']);
+				$inpostparcelsModel->setParcelTargetMachineDetail(json_encode($machine_details));
+				$inpostparcelsModel->setApiSource(Mage::helper('inpostparcels/data')->getCurrentApi());
+				$inpostparcelsModel->save();
+			}
+		}
+		// PayPal change EN
 	}
 
     public function loadOrderAfter($evt){
@@ -103,6 +171,37 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
             }
         }
     }
+
+	// PayPal change SN
+	///
+	// saveQuoteBefore
+	//
+	public function saveQuoteBefore($evt)
+	{
+		$quote = $evt->getQuote();
+
+		$post = Mage::app()->getFrontController()->getRequest()->getPost();
+
+		if(isset($post['inpost_hidden_machine']))
+		{
+			$shippingAddress = $quote->getShippingAddress();
+
+			//$data[] = $quote->getId();
+			$data['parcel_source_machine_id'] = $post['inpost_hidden_machine'];
+			$data['parcel_receiver_phone']    = $post['inpost_hidden_mobile'];
+			$data['parcel_receiver_details']  = $post['inpost_hidden_details'];
+			if($shippingAddress != null)
+			{
+				$data['parcel_receiver_email'] = $shippingAddress->getEmail();
+			}
+			else
+			{
+				$data['parcel_receiver_email'] = '';
+			}
+			$quote->setInpostparcelsData($data);
+		}
+	}
+	// PayPal change EN
 
     public function salesOrderShipmentSaveAfter($evt){
         /*

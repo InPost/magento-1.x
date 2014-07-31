@@ -99,7 +99,7 @@
                         <!--</insurance_amount>-->
                         <max_weight translate="label comment">
                             <label>Max weight</label>
-                            <comment>Max weight is 25</comment>
+                            <comment>Max weight is 20</comment>
                             <frontend_type>text</frontend_type>
                             <validate>validate-number validate-zero-or-greater</validate>
                             <sort_order>11</sort_order>
