@@ -115,13 +115,13 @@
             <input type="hidden" id="box_machine_town" name="box_machine_town" disabled="disabled" />
             <input type="hidden" id="address" name="address" disabled="disabled" />
             <a href="#" onclick="openMap(); return false;"><?php echo $this->__('Map')?></a>
-            &nbsp|&nbsp<input type="checkbox" name="show_all_machines"> <?php echo $this->__('Show terminals in other cities') ?>
+            &nbsp;|&nbsp;<input type="checkbox" name="show_all_machines"> <?php echo $this->__('Show terminals in other cities') ?>
         </span>
     </li>
     <li>
         <label for="<?php echo $_code ?>_receiver_phone" class="required"><em>*</em><?php echo $this->__("Mobile e.g. 523045856") ?></label>
         <span class="input-box">
-        	(07) <input type='text' name='shipping_inpostparcels[receiver_phone]' id="<?php echo $_code ?>_phone" title="mobile /^[1-9]{1}\d{8}$/" class='required-entry validate-number validate-length minimum-length-9 maximum-length-9 inpostparcels_phone' value='<?php echo $inpostparcelsData['receiver_phone']?$inpostparcelsData['receiver_phone']:$user_phone?>' />
+        	(07) <input type='text' name='shipping_inpostparcels[receiver_phone]' id="<?php echo $_code ?>_phone" title="Mobile Number to Receive PIN" class='required-entry validate-number validate-length minimum-length-9 maximum-length-9 inpostparcels_phone' value='<?php echo $inpostparcelsData['receiver_phone']?$inpostparcelsData['receiver_phone']:$user_phone?>' />
         </span>
     </li>
 </ul>
