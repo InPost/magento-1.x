@@ -4,7 +4,7 @@
 
     <modules>
         <Inpost_Inpostparcels>
-            <version>0.1.2</version>
+            <version>0.1.3</version>
         </Inpost_Inpostparcels>
     </modules>
 
@@ -173,7 +173,7 @@
                 <title>InPost Parcel Lockers 24/7</title>
                 <name>Kwota</name>
                 <api_url>API_URL</api_url>
-                <max_weight>25</max_weight>
+                <max_weight>20</max_weight>
                 <max_dimension_a>8x38x64</max_dimension_a>
                 <max_dimension_b>19x38x64</max_dimension_b>
                 <max_dimension_c>41x38x64</max_dimension_c>
