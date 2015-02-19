@@ -1,13 +1,16 @@
 <script type="text/javascript" src="<?php echo Mage::helper('inpostparcels/data')->getGeowidgetUrl(); ?>"></script>
 <script type="text/javascript">
-    function user_function(value) {
+//<![CDATA[
+	var $j = jQuery.noConflict();
+
+function user_function(value)
+{
         var address = value.split(';');
         //document.getElementById('town').value=address[1];
         //document.getElementById('street').value=address[2]+address[3];
         var box_machine_name = document.getElementById('name').value;
         var box_machine_town = document.value=address[1];
         var box_machine_street = document.value=address[2];
-
 
         var is_value = 0;
         document.getElementById('shipping_inpostparcels').value = box_machine_name;
@@ -25,6 +28,7 @@
             shipping_inpostparcels.selectedIndex = shipping_inpostparcels.length-1;
         }
     }
+//]]>
 </script>
 
 <?php if (!($_shippingRateGroups = $this->getShippingRates())): ?>
@@ -111,34 +115,33 @@
             }
        });
     });
-//]]>
-jQuery(document).ready(function(){
+$j(document).ready(function(){
 	hideShippingAll();
-	jQuery('input[type="radio"][name="shipping_method"]').click(function(){
+	$j('input[type="radio"][name="shipping_method"]').click(function(){
 			hideShippingAll();
-			var code = jQuery(this).val();
-			if(jQuery(this).is(':checked')){
+			var code = $j(this).val();
+			if($j(this).is(':checked')){
 				showShipping(code);
 			}
 	});
-	jQuery('input[type="radio"][name="shipping_method"]').each(function(){
-		var code = jQuery(this).val();
-		if(jQuery(this).is(":checked")){
+	$j('input[type="radio"][name="shipping_method"]').each(function(){
+		var code = $j(this).val();
+		if($j(this).is(":checked")){
 			showShipping(code);
 		}
 	});
 });
 function showShipping(code){
-	if(jQuery('#'+'shipping_form_'+code).length != 0){
-		jQuery('#'+'shipping_form_'+code).show();
-		jQuery(this).find('.required-entry').attr('disabled','false');
+	if($j('#'+'shipping_form_'+code).length != 0){
+		$j('#'+'shipping_form_'+code).show();
+		$j(this).find('.required-entry').attr('disabled','false');
 	}
 }
 function hideShippingAll(){
-	jQuery('input[type="radio"][name="shipping_method"]').each(function(){
-		var code = jQuery(this).val();
-		jQuery('#'+'shipping_form_'+code).hide();
-		jQuery(this).find('.required-entry').attr('disabled','true');
+	$j('input[type="radio"][name="shipping_method"]').each(function(){
+		var code = $j(this).val();
+		$j('#'+'shipping_form_'+code).hide();
+		$j(this).find('.required-entry').attr('disabled','true');
 	});
 }
 
@@ -146,5 +149,6 @@ Validation.add('inpostparcels_phone', '<?php echo $this->__('Phone validation er
     pattern : /^[1-9]{1}\d{8}$/
 });
 
+//]]>
 </script>
 <?php endif; ?>

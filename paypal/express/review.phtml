@@ -22,9 +22,17 @@
  * @package     base_default
  * @copyright   Copyright (c) 2009 Irubin Consulting Inc. DBA Varien (http://www.varien.com)
  * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ *
  */
+//
+// InPost
+// NB This is for the Magento < 1.9 code.
+//
+// Added code to allow the PayPal express checkout method to work.
+// The code is highlighted but please make sure to go through all of the lines.
+//
 ?>
-<!-- Inpost.sn -->
+<!-- InPost.sn -->
 <?php
 	$machine_params = array();
 	switch(Mage::helper('inpostparcels/data')->getCurrentApi())
@@ -91,24 +99,24 @@
 		}
 	}
 ?>
-<!-- Inpost.en -->
+<!-- InPost.en -->
 
 <div class="page-title">
     <h1><?php echo $this->__('Review Order') ?></h1>
 </div>
 <?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
 
-<!-- Inpost.sn -->
+<!-- InPost UK.sn -->
+<?php
+$shipping_inpostparcels = Mage::registry('inpostparcelsData');
+?>
+
 <select name="hidden_machine_list" id="hidden_machine_list" style="display:none;">
 <?php foreach($parcelTargetAllMachinesDetail as $key => $value): ?>
 <option value='<?php echo $key; ?>'><?php echo $value['address']['city'] . ';' . $value['address']['street'] . ';' . $value['address']['building_number'] . ';';?></option>
 <?php endforeach; ?>
 </select>
-
-<?php
-$shipping_inpostparcels = Mage::registry('inpostparcelsData');
-?>
-<!-- Inpost.en -->
+<!-- InPost UK.en -->
 
 <?php if ($this->getShippingAddress()): ?>
 <div class="info-set col2-set">
@@ -178,7 +186,7 @@ $shipping_inpostparcels = Mage::registry('inpostparcelsData');
                 <?php endif; ?>
             </div>
 	</div>
-<!-- Inpost.sn -->
+<!-- InPost.sn -->
 	<div id="inpost_locker_div" style="display:none;">
         <script type="text/javascript" src="https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function"></script>
 <script type="text/javascript">
@@ -223,10 +231,9 @@ function user_function(value)
                 <?php foreach($parcelTargetMachinesId as $key => $parcelTargetMachineId): ?>
 			<option value='<?php echo $key ?>'><?php echo $parcelTargetMachineId; ?></option>
                 <?php endforeach; ?>
-
 		</select>
 		<br />
-        	<a href="#" onClick="openMap(); return false;"><?php echo $this->__('Map')?></a>
+                	<a href="#" onClick="openMap(); return false;"><?php echo $this->__('Map')?></a>
 		
 	&nbsp; | &nbsp; <input type="checkbox" name="show_all_machines"><?php echo $this->__('Show terminals in other cities') ?> 
 
@@ -236,12 +243,10 @@ function user_function(value)
 		(07)<input type="text" name="shipping_inpostparcels[receiver_phone]" id="inpostparcels_phone" class="validate-number minimum-length-9 maximum-length-9 inpostparcels_phone" value="" maxlength="9" />
 		</span>
 <script type="text/javascript">
-var $j2 = jQuery.noConflict();
 
-$j2(document).ready(function(){
-
-    $j2('input[type="checkbox"][name="show_all_machines"]').click(function(){
-        var machines_list_type = $j2(this).is(':checked');
+jQuery(document).ready(function(){
+    jQuery('input[type="checkbox"][name="show_all_machines"]').click(function(){
+        var machines_list_type = jQuery(this).is(':checked');
 
 	if(machines_list_type == true)
 	{
@@ -250,7 +255,7 @@ $j2(document).ready(function(){
             <?php foreach($parcelTargetAllMachinesId as $key => $parcelTargetAllMachineId): ?>
                 '<?php echo $key ?>' : '<?php echo addslashes($parcelTargetAllMachineId) ?>',
             <?php endforeach; ?>
-		};
+                       };
 	}
 	else
 	{
@@ -262,35 +267,35 @@ $j2(document).ready(function(){
                         };
         }
 
-        $j2('#shipping_inpostparcels option').remove();
-        $j2.each(machines, function(val, text) {
-            $j2('#shipping_inpostparcels').append(
-                    $j2('<option></option>').val(val).html(text)
+        jQuery('#shipping_inpostparcels option').remove();
+        jQuery.each(machines, function(val, text) {
+            jQuery('#shipping_inpostparcels').append(
+                    jQuery('<option></option>').val(val).html(text)
             );
         });
     });
 
-    $j2('input[type="radio"][name="shipping_method"]').click(function(){
-        if($j2("#s_method_inpostparcels_inpostparcels").is(":checked")){
-            $j2("#shipping_form_inpostparcels_inpostparcels").css("display");
+    jQuery('input[type="radio"][name="shipping_method"]').click(function(){
+        if(jQuery("#s_method_inpostparcels_inpostparcels").is(":checked")){
+            jQuery("#shipping_form_inpostparcels_inpostparcels").css("display");
         }else{
-            $j2("#shipping_form_inpostparcels_inpostparcels").css("display","none");
+            jQuery("#shipping_form_inpostparcels_inpostparcels").css("display","none");
         }
     });
-	$j2('#shipping_inpostparcels').change(function(){
+	jQuery('#shipping_inpostparcels').change(function(){
 		// Check and set the hidden fields for the machine's data
 		// hidden_machine_list
-		$j2('[name=hidden_machine_list]').val(
-			$j2('#shipping_inpostparcels').val() );
+		jQuery('[name=hidden_machine_list]').val(
+			jQuery('#shipping_inpostparcels').val() );
 
-		$j2('#address').val($j2("#hidden_machine_list option:selected" ).text() );
+		jQuery('#address').val(jQuery("#hidden_machine_list option:selected" ).text() );
 	});
 });
 
 </script>
-<!-- Inpost.en -->
 
 	</div>
+<!-- InPost.en -->
     </div>
 </div>
 <?php endif; ?>
@@ -328,7 +333,7 @@ $j2(document).ready(function(){
 <form method="post" id="order_review_form" action="<?php echo $this->getUrl($this->getPaypalActionPrefix().'/express/placeOrder') ?>">
     <div class="buttons-set buttons-set-order" id="review-buttons-container">
 
-<!-- Inpost.sn -->
+	<!-- InPost.sn -->
 	<!-- Hidden Fields, allow us to save details -->
 	<input type="hidden" name="inpost_hidden_machine" id="inpost_hidden_machine" value="daz_01" />
 	<input type="hidden" name="inpost_hidden_mobile" id="inpost_hidden_mobile" value="daz_02" />
@@ -339,9 +344,10 @@ $j2(document).ready(function(){
 
 	<button id="check_data_fields" name="check_data_fields" onClick="return check_fields();" class="button" >
 		<span><span><?php echo $this->__('Place an Order') ?></span></span></button>
-<!-- Inpost.en -->
 
-<!-- Inpost line changed added style="display:none;" -->
+	<!-- InPost.en -->
+	<!-- The following line gets style="display:none;"
+		to prevent it from showing-->
 	<button id="review_button" value="<?php echo $this->__('Place an Order') ?>" title="<?php echo $this->__('Place an Order') ?>"
 class="button btn-checkout" style="display:none;"><span><span><?php echo $this->__('Place an Order') ?></span></span></button>
         <button type="submit" id="review_submit" value="<?php echo $this->__('Place an Order') ?>" title="<?php echo $this->__('Place an Order') ?>" class="button btn-checkout"><span><span><?php echo $this->__('Place an Order') ?></span></span></button>
@@ -370,8 +376,9 @@ if (virtualship == 1){
 PayPalExpressAjax.addPleaseWait($('review-please-wait'));
 //]]>
 
-// Inpost.sn
-
+//**********
+// InPost.sn
+//**********
 ///
 // check_fields
 //
@@ -380,14 +387,14 @@ PayPalExpressAjax.addPleaseWait($('review-please-wait'));
 //
 function check_fields()
 {
-	if($j2('#shipping_method').val() == 'inpostparcels_inpostparcels')
+	if(jQuery('#shipping_method').val() == 'inpostparcels_inpostparcels')
 	{
-		if($j2('#shipping_inpostparcels').val() == '')
+		if(jQuery('#shipping_inpostparcels').val() == '')
 		{
 			alert('Please fill in the Locker ID.');
 			return false;
 		}
-		if($j2('#inpostparcels_phone').val() == '')
+		if(jQuery('#inpostparcels_phone').val() == '')
 		{
 			alert('Please fill in the mobile number.');
 			return false;
@@ -395,16 +402,16 @@ function check_fields()
 	}
 	// Save the Machine ID into our hidden field that is on the correct
 	// form.
-	$j2('#inpost_hidden_machine').val($j2('#shipping_inpostparcels').val());
-	$j2('#inpost_hidden_mobile').val($j2('#inpostparcels_phone').val());
+	jQuery('#inpost_hidden_machine').val(jQuery('#shipping_inpostparcels').val());
+	jQuery('#inpost_hidden_mobile').val(jQuery('#inpostparcels_phone').val());
 	// The address field contains the ';' seperate fields.
 	// e.g. Airdrie;Glen Road;1;false
-	$j2('#inpost_hidden_details').val(
-		$j2('#address').val()
+	jQuery('#inpost_hidden_details').val(
+		jQuery('#address').val()
 	);
 
 	// We are good to submit
-	$j2( "#review_button" ).submit();
+	jQuery( "#review_button" ).submit();
 	return true;
 }
 
@@ -413,7 +420,7 @@ function check_fields()
 //
 function showShipping()
 {
-	$j2('#inpost_locker_div').show();
+	jQuery('#inpost_locker_div').show();
 }
 
 ///
@@ -421,7 +428,7 @@ function showShipping()
 //
 function hideShippingAll()
 {
-	$j2('#inpost_locker_div').hide();
+	jQuery('#inpost_locker_div').hide();
 }
 
 ///
@@ -429,9 +436,9 @@ function hideShippingAll()
 //
 // @brief Display InPost fields as required.
 //
-$j2(document).ready(function() {
+jQuery(document).ready(function() {
 
-	if($j2('#shipping_method').val() == 'inpostparcels_inpostparcels')
+	if(jQuery('#shipping_method').val() == 'inpostparcels_inpostparcels')
 	{
 		showShipping();
 	}
@@ -440,9 +447,9 @@ $j2(document).ready(function() {
 		hideShippingAll();
 	}
 
-	$j2('#shipping_method').change(function() {
+	jQuery('#shipping_method').change(function() {
 
-		if($j2('#shipping_method').val() == 'inpostparcels_inpostparcels')
+		if(jQuery('#shipping_method').val() == 'inpostparcels_inpostparcels')
 		{
 			showShipping();
 		}
@@ -452,6 +459,8 @@ $j2(document).ready(function() {
 		}
 	});
 });
-// Inpost.en
+//**********
+// InPost.en
+//**********
 
 </script>

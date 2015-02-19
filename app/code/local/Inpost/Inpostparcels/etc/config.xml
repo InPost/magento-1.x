@@ -171,7 +171,7 @@
                 <active>1</active>
                 <model>inpostparcels/carrier_inpostparcels</model>
                 <title>InPost Parcel Lockers 24/7</title>
-                <name>Kwota</name>
+                <name>Amount</name>
                 <api_url>API_URL</api_url>
                 <max_weight>20</max_weight>
                 <max_dimension_a>8x38x64</max_dimension_a>

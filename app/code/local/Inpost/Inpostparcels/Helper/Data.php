@@ -200,38 +200,50 @@ class Inpost_Inpostparcels_Helper_Data extends Mage_Core_Helper_Abstract
             'parcelSize' => $parcelSize,
             'isDimension' => $is_dimension
         );
-    }
+	}
 
-    public static function getCurrentApi(){
-        $currentApi = 'UK';
+	///
+	// getCurrentApi
+	//
+	public static function getCurrentApi()
+	{
+		$currentApi = 'UK';
 
-        if(Mage::getStoreConfig('carriers/inpostparcels/specificcountry') && !is_array(Mage::getStoreConfig('carriers/inpostparcels/specificcountry'))){
-            $currentApi = Mage::getStoreConfig('carriers/inpostparcels/specificcountry');
-            if($currentApi == 'GB'){
-                $currentApi = 'UK';
-            }
-        }
+		if(Mage::getStoreConfig('carriers/inpostparcels/specificcountry') && !is_array(Mage::getStoreConfig('carriers/inpostparcels/specificcountry')))
+		{
+			$current_Api = Mage::getStoreConfig('carriers/inpostparcels/specificcountry');
+			if(strlen($current_Api) <= 2)
+			{
+				if($current_Api == 'GB')
+				{
+					$currentApi = 'UK';
+				}
+			}
+		}
 
-        return $currentApi;
-    }
+		return $currentApi;
+	}
 
-    public static function getVersion(){
-        return '1.0.0';
-    }
+	public static function getVersion()
+	{
+		return '1.0.0';
+	}
 
-    public static function getGeowidgetUrl(){
-
-        switch(self::getCurrentApi()){
-            case 'UK':
-                return 'https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function';
-                break;
-
-            case 'PL':
-                return 'https://geowidget.inpost.pl/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function';
-                break;
-        }
-
-    }
-
+	///
+	// getGeowidgetUrl
+	//
+	public static function getGeowidgetUrl()
+	{
+		switch(self::getCurrentApi())
+		{
+			default:
+			case 'UK':
+				return 'https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function';
+				break;
+			case 'PL':
+				return 'https://geowidget.inpost.pl/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function';
+				break;
+		}
+	}
 
 }

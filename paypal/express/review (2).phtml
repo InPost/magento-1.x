@@ -20,11 +20,26 @@
  *
  * @category    design
  * @package     base_default
- * @copyright   Copyright (c) 2009 Irubin Consulting Inc. DBA Varien (http://www.varien.com)
+ * @copyright   Copyright (c) 2014 Magento Inc. (http://www.magentocommerce.com)
  * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
  */
+//============================================================================
+//
+// InPost UK Modifications
+//
+// NB This file is for the 1.9.0.1 source code of Magento.
+// It contains a number of changes from the original file.
+// I have tried to comment every change but do go through all of the file.
+//
+//============================================================================
+
+/** @var $this Mage_Paypal_Block_Express_Review */
 ?>
-<!-- Inpost.sn -->
+<?php // InPost.SN ?>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js" ></script>
+<script>
+var $j = jQuery.noConflict();
+</script>
 <?php
 	$machine_params = array();
 	switch(Mage::helper('inpostparcels/data')->getCurrentApi())
@@ -90,15 +105,15 @@
 			}
 		}
 	}
+	// InPost.EN
 ?>
-<!-- Inpost.en -->
 
 <div class="page-title">
     <h1><?php echo $this->__('Review Order') ?></h1>
 </div>
-<?php echo $this->getMessagesBlock()->getGroupedHtml() ?>
+<?php echo $this->getMessagesBlock()->toHtml() ?>
 
-<!-- Inpost.sn -->
+<?php // InPost.SN ?>
 <select name="hidden_machine_list" id="hidden_machine_list" style="display:none;">
 <?php foreach($parcelTargetAllMachinesDetail as $key => $value): ?>
 <option value='<?php echo $key; ?>'><?php echo $value['address']['city'] . ';' . $value['address']['street'] . ';' . $value['address']['building_number'] . ';';?></option>
@@ -107,78 +122,61 @@
 
 <?php
 $shipping_inpostparcels = Mage::registry('inpostparcelsData');
+// InPost.EN
 ?>
-<!-- Inpost.en -->
 
 <?php if ($this->getShippingAddress()): ?>
-<div class="info-set col2-set">
-    <h2 class="legend"><?php echo $this->__('Shipping Information') ?></h2>
-    <div class="col-1">
-        <div class="box">
-            <div class="box-title">
-                <h3><?php echo $this->__('Shipping Address') ?><span class="separator"><?php if ($this->getCanEditShippingAddress()):?> | </span><a href="<?php echo $this->getUrl('paypal/express/edit') ?>"><?php echo $this->__('Change Shipping Address') ?></a><?php endif;?></h3>
-            </div>
-            <div class="box-content">
-                <address>
-                    <?php echo $this->getShippingAddress()->getFormated(true) ?>
-                </address>
+    <div class="info-set col2-set">
+        <h2 class="legend"><?php echo $this->__('Shipping Information') ?></h2>
+        <div class="col-1">
+            <div class="box">
+                <div class="box-title">
+                    <h3><?php echo $this->__('Shipping Address') ?><span class="separator"><?php if ($this->getCanEditShippingAddress()):?> | </span><a href="<?php echo $this->getEditUrl() ?>"><?php echo $this->__('Edit') ?></a><?php endif;?></h3>
+                </div>
+                <div class="box-content">
+                    <address><?php echo $this->renderAddress($this->getShippingAddress())?></address>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col-2">
-        <div class="box">
-            <div class="box-title">
-                <h3><?php echo $this->__('Shipping Method') ?></h3>
-            </div>
-            <div class="box-content">
-                <?php if ($this->isVirtual()): ?>
-                    <p><strong><?php echo $this->__('No shipping method required.') ?></strong></p>
-                <?php else: ?>
-                    <?php if (!($_shippingRateGroups = $this->getShippingRates())): ?>
-                        <p><strong><?php echo $this->__('Sorry, no quotes are available for this order at this time.') ?></strong></p>
-                    <?php else: ?>
-                    <form method="post" id="shipping_method_form" action="<?php echo $this->getUrl($this->getPaypalActionPrefix().'/express/saveShippingMethod') ?>">
-                        <fieldset>
-                            <select name="shipping_method" id="shipping_method" style="width:250px;" class="required-entry">
-                            <?php if(!$this->getAddressShippingMethod()): ?>
-                                <option value=""><?php echo $this->__('Please select a shipping method...') ?></option>
-                            <?php endif ?>
-                            <?php foreach ($_shippingRateGroups as $code => $_rates): ?>
-                                <?php // if (!($this->getCarrierName($code) == "NEW Click and Collect")): ?>
-                                    <optgroup label="<?php echo $this->getCarrierName($code) ?>" style="font-style:normal;">
-                                    <?php foreach ($_rates as $_rate): ?>
-                                       <?php if ($_rate->getErrorMessage()): ?>
-                                            <option value="">
-                                                <?php echo $_rate->getErrorMessage() ?>
-                                            </option>
-                                       <?php else: ?>
-                                           <option value="<?php echo $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()): ?> selected="selected"<?php endif ?> style="margin-left:16px;">
-                                                <?php echo $_rate->getMethodTitle() ?> -
-
-                                                <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
-                                                <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
-
-                                                <?php echo $_excl; ?>
-                                                <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
-                                                    (<?php echo $this->__('Incl. Tax'); ?> <?php echo $_incl; ?>)
-                                                <?php endif; ?>
-                                           </option>
-                                       <?php endif ?>
-                                    <?php endforeach; ?>
-                                    </optgroup>
-                                <?php // endif; ?>
-                            <?php endforeach; ?>
-                            </select>
-                            <p class="actions">
-                                <button id="update_shipping_method_submit" type="submit" class="button"><span><span><?php echo $this->__('Update Shipping Method') ?></span></span></button>
-                            </p>
-                        </fieldset>
+        <div class="col-2">
+            <div class="box">
+                <div class="box-title">
+                    <h3><?php echo $this->__('Shipping Method') ?></h3>
+                </div>
+                <div class="box-content">
+                    <form method="post" id="shipping_method_form" action="<?php echo $this->escapeHtml($this->getShippingMethodSubmitUrl()) ?>">
+                        <?php if ($this->getCanEditShippingMethod() || !$this->getCurrentShippingRate()):?>
+                            <?php if ($groups = $this->getShippingRateGroups()):?>
+                                <?php $currentRate = $this->getCurrentShippingRate(); ?>
+                                <fieldset>
+                                    <select name="shipping_method" id="shipping_method" style="width:250px;" class="required-entry">
+                                        <?php if (!$currentRate):?>
+                                            <option value=""><?php echo $this->__('Please select a shipping method...') ?></option>
+                                        <?php endif;?>
+                                        <?php foreach ($groups as $code => $rates):?>
+                                            <optgroup label="<?php echo $this->escapeHtml($this->getCarrierName($code)) ?>" style="font-style:normal;">
+                                                <?php foreach ($rates as $rate):?>
+                                                    <option value="<?php echo $this->renderShippingRateValue($rate)?>"<?php echo ($currentRate === $rate) ? ' selected="selected"' : '' ;?>>
+                                                        <?php echo $this->renderShippingRateOption($rate)?>
+                                                    </option>
+                                                <?php endforeach;?>
+                                            </optgroup>
+                                        <?php endforeach;?>
+                                    </select>
+                                </fieldset>
+                                <p class="actions">
+                                    <button id="update_shipping_method_submit" type="submit" class="button"><span><span><?php echo $this->__('Update Shipping Method') ?></span></span></button>
+                                </p>
+                            <?php else: ?>
+                                <p><strong><?php echo $this->__('Sorry, no quotes are available for this order at this time.') ?></strong></p>
+                            <?php endif;?>
+                        <?php else: ?>
+                            <p><strong><?php echo $this->renderShippingRateOption($this->getCurrentShippingRate())?></strong></p>
+                        <?php endif; ?>
                     </form>
-                    <?php endif; ?>
-                <?php endif; ?>
+                </div>
             </div>
-	</div>
-<!-- Inpost.sn -->
+<?php // InPost.SN ?>
 	<div id="inpost_locker_div" style="display:none;">
         <script type="text/javascript" src="https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function"></script>
 <script type="text/javascript">
@@ -190,7 +188,6 @@ function user_function(value)
 	var box_machine_name = document.getElementById('name').value;
 	var box_machine_town = document.value = address[1];
 	var box_machine_street = document.value = address[2];
-
 
         var is_value = 0;
         document.getElementById('shipping_inpostparcels').value = box_machine_name;
@@ -236,12 +233,11 @@ function user_function(value)
 		(07)<input type="text" name="shipping_inpostparcels[receiver_phone]" id="inpostparcels_phone" class="validate-number minimum-length-9 maximum-length-9 inpostparcels_phone" value="" maxlength="9" />
 		</span>
 <script type="text/javascript">
-var $j2 = jQuery.noConflict();
 
-$j2(document).ready(function(){
+$j(document).ready(function(){
 
-    $j2('input[type="checkbox"][name="show_all_machines"]').click(function(){
-        var machines_list_type = $j2(this).is(':checked');
+    $j('input[type="checkbox"][name="show_all_machines"]').click(function(){
+        var machines_list_type = $j(this).is(':checked');
 
 	if(machines_list_type == true)
 	{
@@ -262,37 +258,37 @@ $j2(document).ready(function(){
                         };
         }
 
-        $j2('#shipping_inpostparcels option').remove();
-        $j2.each(machines, function(val, text) {
-            $j2('#shipping_inpostparcels').append(
-                    $j2('<option></option>').val(val).html(text)
+        $j('#shipping_inpostparcels option').remove();
+        $j.each(machines, function(val, text) {
+            $j('#shipping_inpostparcels').append(
+                    $j('<option></option>').val(val).html(text)
             );
         });
     });
 
-    $j2('input[type="radio"][name="shipping_method"]').click(function(){
-        if($j2("#s_method_inpostparcels_inpostparcels").is(":checked")){
-            $j2("#shipping_form_inpostparcels_inpostparcels").css("display");
+    $j('input[type="radio"][name="shipping_method"]').click(function(){
+        if($j("#s_method_inpostparcels_inpostparcels").is(":checked")){
+            $j("#shipping_form_inpostparcels_inpostparcels").css("display");
         }else{
-            $j2("#shipping_form_inpostparcels_inpostparcels").css("display","none");
+            $j("#shipping_form_inpostparcels_inpostparcels").css("display","none");
         }
     });
-	$j2('#shipping_inpostparcels').change(function(){
+	$j('#shipping_inpostparcels').change(function(){
 		// Check and set the hidden fields for the machine's data
 		// hidden_machine_list
-		$j2('[name=hidden_machine_list]').val(
-			$j2('#shipping_inpostparcels').val() );
+		$j('[name=hidden_machine_list]').val(
+			$j('#shipping_inpostparcels').val() );
 
-		$j2('#address').val($j2("#hidden_machine_list option:selected" ).text() );
+		$j('#address').val($j("#hidden_machine_list option:selected" ).text() );
 	});
 });
 
 </script>
-<!-- Inpost.en -->
-
 	</div>
+<?php // InPost.EN ?>
+
+        </div>
     </div>
-</div>
 <?php endif; ?>
 
 <div class="info-set col2-set">
@@ -300,20 +296,12 @@ $j2(document).ready(function(){
     <div class="col-1">
         <div class="box">
             <div class="box-title">
-                <h3><?php echo $this->__('Payment Method') ?> <span class="separator">|</span> <a href="<?php echo $this->getUrl($this->getPaypalActionPrefix().'/express/edit') ?>"><?php echo $this->__('Change Payment Method') ?></a></h3>
-            </div>
-        </div>
-    </div>
-    <div class="col-2">
-        <div class="box">
-            <div class="box-title">
-                <h3><?php echo $this->__('Billing Address') ?></h3>
+                <h3><?php echo $this->__('Payment Method') ?> <span class="separator">|</span>
+                    <?php if($this->getEditUrl()):?><a href="<?php echo $this->getEditUrl() ?>"><?php echo $this->__('Edit Payment Information') ?></a> <?php endif ?>
+                </h3>
             </div>
             <div class="box-content">
-                <address>
-                    <?php echo $this->getBillingAddress()->getFormated(true) ?><br />
-                    <?php echo $this->__('Payer Email: %s', $this->getBillingAddress()->getEmail()) ?>
-                </address>
+                <?php echo $this->escapeHtml($this->getPaymentMethodTitle()) ?>
             </div>
         </div>
     </div>
@@ -325,10 +313,10 @@ $j2(document).ready(function(){
         <?php echo $this->getChildHtml('details') ?>
     </div>
 </div>
-<form method="post" id="order_review_form" action="<?php echo $this->getUrl($this->getPaypalActionPrefix().'/express/placeOrder') ?>">
+<form method="post" id="order_review_form" action="<?php echo $this->getPlaceOrderUrl() ?>">
+    <?php echo $this->getChildHtml('agreements'); ?>
     <div class="buttons-set buttons-set-order" id="review-buttons-container">
-
-<!-- Inpost.sn -->
+<?php // InPost.SN ?>
 	<!-- Hidden Fields, allow us to save details -->
 	<input type="hidden" name="inpost_hidden_machine" id="inpost_hidden_machine" value="daz_01" />
 	<input type="hidden" name="inpost_hidden_mobile" id="inpost_hidden_mobile" value="daz_02" />
@@ -339,39 +327,78 @@ $j2(document).ready(function(){
 
 	<button id="check_data_fields" name="check_data_fields" onClick="return check_fields();" class="button" >
 		<span><span><?php echo $this->__('Place an Order') ?></span></span></button>
-<!-- Inpost.en -->
+<?php // InPost.EN ?>
 
-<!-- Inpost line changed added style="display:none;" -->
-	<button id="review_button" value="<?php echo $this->__('Place an Order') ?>" title="<?php echo $this->__('Place an Order') ?>"
-class="button btn-checkout" style="display:none;"><span><span><?php echo $this->__('Place an Order') ?></span></span></button>
-        <button type="submit" id="review_submit" value="<?php echo $this->__('Place an Order') ?>" title="<?php echo $this->__('Place an Order') ?>" class="button btn-checkout"><span><span><?php echo $this->__('Place an Order') ?></span></span></button>
+<?php // InPost The following lines are changed to hide then by adding a 
+	// style="display:none;"
+?>
+        <button type="button" id="review_button" value="<?php echo $this->__('Place Order') ?>" class="button btn-checkout" style="display:none;"><span><span><?php echo $this->__('Place Order') ?></span></span></button>
+        <button type="button" id="review_submit" value="<?php echo $this->__('Place Order') ?>" class="button btn-checkout"><span><span><?php echo $this->__('Place Order') ?></span></span></button>
         <span class="please-wait" id="review-please-wait" style="display:none;">
             <img src="<?php echo $this->getSkinUrl('images/opc-ajax-loader.gif') ?>" alt="<?php echo $this->__('Submitting order information...') ?>" title="<?php echo $this->__('Submitting order information...') ?>" class="v-middle" /> <?php echo $this->__('Submitting order information...') ?>
         </span>
     </div>
 </form>
 <script type="text/javascript">
-//<![CDATA[
-// submit buttons are not needed when submitting with ajax
-$('review_submit').hide();
-if ($('update_shipping_method_submit')) {
-    $('update_shipping_method_submit').hide();
-}
-var virtualship = "<?php echo $this->isVirtual(); ?>";
+    //<![CDATA[
+    // submit buttons are not needed when submitting with ajax
+    $('review_submit').hide();
+    if ($('update_shipping_method_submit')) {
+        $('update_shipping_method_submit').hide();
+    }
 
-if (virtualship == 1){
-	PayPalExpressAjax = new OrderReviewController($('order_review_form'), $('review_button'),
-'x','x','details-reload');
-}else{
-	PayPalExpressAjax = new OrderReviewController($('order_review_form'), $('review_button'),
- $('shipping_method'), $('shipping_method_form'), 'details-reload');
-}
+    <?php if ($this->getUseAjax()):?>
+    OrderReviewController.prototype._submitOrder = function() {
+        if (this._canSubmitOrder) {
+            if (this._pleaseWait) {
+                this._pleaseWait.show();
+            }
+            new Ajax.Request(this.form.action, {
+                parameters: {isAjax: 1, method: 'POST'},
+                onSuccess: function(transport) {
+                    try{
+                        response = eval('(' + transport.responseText + ')');
+                    } catch (e) {
+                        response = {};
+                    }
+                    if (response.redirect) {
+                        setLocation(response.redirect);
+                        return;
+                    }
+                    if (response.success) {
+                        setLocation('<?php echo $this->getSuccessUrl()?>');
+                        return;
+                    } else {
+                        var msg = response.error_messages;
+                        if (typeof(msg)=='object') {
+                            msg = msg.join("\n");
+                        }
+                        if (msg) {
+                            $('review-please-wait').hide();
+                            alert(msg);
+                            return;
+                        }
+                    }
+                    $('review-please-wait').hide();
+                    alert('<?php echo $this->jsQuoteEscape($this->__('Unknown Error. Please try again later.')); ?>');
+                    return;
+                },
+                onFailure: function(){
+                    alert('<?php echo $this->jsQuoteEscape($this->__('Server Error. Please try again.')) ?>');
+                    $('review-please-wait').hide();
+                }
+            });
+        }
+    }
+    <?php endif ?>
 
-PayPalExpressAjax.addPleaseWait($('review-please-wait'));
-//]]>
+    PayPalExpressAjax = new OrderReviewController($('order_review_form'), $('review_button'),
+        $('shipping_method'), $('shipping_method_form'), 'details-reload'
+    );
+    PayPalExpressAjax.addPleaseWait($('review-please-wait'));
+    //]]>
 
-// Inpost.sn
-
+<?php // InPost.SN ?>
 ///
 // check_fields
 //
@@ -380,14 +407,14 @@ PayPalExpressAjax.addPleaseWait($('review-please-wait'));
 //
 function check_fields()
 {
-	if($j2('#shipping_method').val() == 'inpostparcels_inpostparcels')
+	if($j('#shipping_method').val() == 'inpostparcels_inpostparcels')
 	{
-		if($j2('#shipping_inpostparcels').val() == '')
+		if($j('#shipping_inpostparcels').val() == '')
 		{
 			alert('Please fill in the Locker ID.');
 			return false;
 		}
-		if($j2('#inpostparcels_phone').val() == '')
+		if($j('#inpostparcels_phone').val() == '')
 		{
 			alert('Please fill in the mobile number.');
 			return false;
@@ -395,16 +422,16 @@ function check_fields()
 	}
 	// Save the Machine ID into our hidden field that is on the correct
 	// form.
-	$j2('#inpost_hidden_machine').val($j2('#shipping_inpostparcels').val());
-	$j2('#inpost_hidden_mobile').val($j2('#inpostparcels_phone').val());
+	$j('#inpost_hidden_machine').val($j('#shipping_inpostparcels').val());
+	$j('#inpost_hidden_mobile').val($j('#inpostparcels_phone').val());
 	// The address field contains the ';' seperate fields.
 	// e.g. Airdrie;Glen Road;1;false
-	$j2('#inpost_hidden_details').val(
-		$j2('#address').val()
+	$j('#inpost_hidden_details').val(
+		$j('#address').val()
 	);
 
 	// We are good to submit
-	$j2( "#review_button" ).submit();
+	$j( "#review_button" ).submit();
 	return true;
 }
 
@@ -413,7 +440,7 @@ function check_fields()
 //
 function showShipping()
 {
-	$j2('#inpost_locker_div').show();
+	$j('#inpost_locker_div').show();
 }
 
 ///
@@ -421,7 +448,7 @@ function showShipping()
 //
 function hideShippingAll()
 {
-	$j2('#inpost_locker_div').hide();
+	$j('#inpost_locker_div').hide();
 }
 
 ///
@@ -429,9 +456,9 @@ function hideShippingAll()
 //
 // @brief Display InPost fields as required.
 //
-$j2(document).ready(function() {
+$j(document).ready(function() {
 
-	if($j2('#shipping_method').val() == 'inpostparcels_inpostparcels')
+	if($j('#shipping_method').val() == 'inpostparcels_inpostparcels')
 	{
 		showShipping();
 	}
@@ -440,9 +467,9 @@ $j2(document).ready(function() {
 		hideShippingAll();
 	}
 
-	$j2('#shipping_method').change(function() {
+	$j('#shipping_method').change(function() {
 
-		if($j2('#shipping_method').val() == 'inpostparcels_inpostparcels')
+		if($j('#shipping_method').val() == 'inpostparcels_inpostparcels')
 		{
 			showShipping();
 		}
@@ -452,6 +479,5 @@ $j2(document).ready(function() {
 		}
 	});
 });
-// Inpost.en
-
+<?php // InPost.EN ?>
 </script>
