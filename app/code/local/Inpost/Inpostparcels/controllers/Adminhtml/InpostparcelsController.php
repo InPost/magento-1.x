@@ -2,135 +2,208 @@
 
 class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminhtml_Controller_Action
 {
-
-    protected function _initAction() {
+	///
+	// _initAction
+	//
+	protected function _initAction()
+	{
         $this->loadLayout()
             ->_setActiveMenu('sales/inpostparcels')
             ->_addBreadcrumb(Mage::helper('adminhtml')->__('Items Manager'), Mage::helper('adminhtml')->__('Item Manager'));
 
-        return $this;
-    }
+		return $this;
+	}
 
-    public function indexAction() {
-        $this->_initAction()
-            ->renderLayout();
-    }
+	///
+	// indexAction
+	//
+	public function indexAction()
+	{
+		$this->_initAction()
+		->renderLayout();
+	}
 
-    public function massStickersAction()
-    {
-        $parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
-        $countSticker = 0;
-        $countNonSticker = 0;
-        $pdf = null;
+	///
+	// massStickersAction
+	//
+	public function massStickersAction()
+	{
+		$parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
+		$countSticker = 0;
+		$countNonSticker = 0;
+		$pdf = null;
 
-        $parcelsCode = array();
-        $parcelsToPay = array();
+		$parcelsCode = array();
+		$parcelsToPay = array();
 
-        foreach ($parcelsIds as $id) {
-            $parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
-            $orderCollection = Mage::getResourceModel('sales/order_grid_collection')
-                ->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
-                ->getFirstItem();
+		foreach ($parcelsIds as $id)
+		{
+			$parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
+			$orderCollection = Mage::getResourceModel('sales/order_grid_collection')
+			->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
+			->getFirstItem();
 
 //            if($orderCollection->getStatus() != 'processing'){
 //                continue;
 //            }
 
-            if($parcelCollection->getParcelId() != ''){
-                $parcelsCode[$id] = $parcelCollection->getParcelId();
-                if($parcelCollection->getStickerCreationDate() == ''){
-                    $parcelsToPay[$id] = $parcelCollection->getParcelId();
-                }
+			if($parcelCollection->getParcelId() != '')
+			{
+				$parcelsCode[$id] = $parcelCollection->getParcelId();
+				if($parcelCollection->getStickerCreationDate() == '')
+				{
+					$parcelsToPay[$id] = $parcelCollection->getParcelId();
+				}
+			}
+			else
+			{
+				continue;
+			}
+		}
 
-            }else{
-                continue;
-            }
-        }
+		// We can print labels in either Pdf or Epl2 format.
+		// Find out which the store s configured for and then send
+		// the appropriate request.
+		$format = Mage::getStoreConfig('carriers/inpostparcels/label_format');
+		if(strcasecmp($format, 'pdf') == 0)
+		{
+			// PDF format selected
+			$format = 'Pdf';
+			$type   = 'normal';
+		}
+		else
+		{
+			// Epl2 format selected
+			$format = 'Epl2';
+			$type   = 'A6P';
+		}
 
-        if(empty($parcelsCode)){
-            $this->_getSession()->addError($this->__('Parcel ID is empty'));
-        }else{
-            if(!empty($parcelsToPay)){
-                $parcelApiPay = Mage::helper('inpostparcels/data')->connectInpostparcels(array(
-                    'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels/'.implode(';', $parcelsToPay).'/pay',
-                    'methodType' => 'POST',
-                    'params' => array(
-                    )
-                ));
+		if(empty($parcelsCode))
+		{
+			$this->_getSession()->addError($this->__('Parcel ID is empty'));
+		}
+		else
+		{
+			if(!empty($parcelsToPay))
+			{
+				$parcelApiPay = Mage::helper('inpostparcels/data')->connectInpostparcels(array(
+				'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels/'.implode(';', $parcelsToPay).'/pay',
+				'methodType' => 'POST',
+				'params' => array(
+				)
+				));
 
-                Mage::log(var_export($parcelApiPay, 1) . '------', null, date('Y-m-d H:i:s').'-parcels_pay.log');
-                if(@$parcelApiPay['info']['http_code'] != '204'){
-                    $countNonSticker = count($parcelsIds);
-                    if(!empty($parcelApiPay['result'])){
-                        foreach(@$parcelApiPay['result'] as $key => $error){
-                            $this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
-                        }
-                    }
-                    $this->_redirect('*/*/');
-                    return;
-                }
-            }    
+				Mage::log(var_export($parcelApiPay, 1) .
+					'------', null,
+					date('Y-m-d H:i:s').'-parcels_pay.log');
 
-            $parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels(array(
-                'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'stickers/'.implode(';', $parcelsCode),
-                'methodType' => 'GET',
-                'params' => array(
-                    'format' => 'Pdf',
-                    'type' => 'normal'
-                )
-            ));
-        }
+				if(@$parcelApiPay['info']['http_code'] != '204')
+				{
+					$countNonSticker = count($parcelsIds);
+					if(!empty($parcelApiPay['result']))
+					{
+						foreach(@$parcelApiPay['result'] as $key => $error)
+						{
+							$this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
+						}
+					}
+					$this->_redirect('*/*/');
+					return;
+				}
+			}
 
-        if(@$parcelApi['info']['http_code'] != '200'){
-            $countNonSticker = count($parcelsIds);
-            if(!empty($parcelApi['result'])){
-                foreach(@$parcelApi['result'] as $key => $error){
-                    $this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
-                }
-            }
-        }else{
-            foreach ($parcelsIds as $parcelId) {
-                if(isset($parcelsToPay[$parcelId])){
-                    $parcelDb = Mage::getModel('inpostparcels/inpostparcels')->load($parcelId);
-                    $parcelDb->setParcelStatus('Prepared');
-                    $parcelDb->setStickerCreationDate(date('Y-m-d H:i:s'));
-                    $parcelDb->save();
-                }
-                $countSticker++;
-            }
-            $pdf = base64_decode(@$parcelApi['result']);
-        }
 
-        if ($countNonSticker) {
-            if ($countNonSticker) {
-                $this->_getSession()->addError($this->__('%s sticker(s) cannot be generated', $countNonSticker));
-            } else {
-                $this->_getSession()->addError($this->__('The sticker(s) cannot be generated'));
-            }
-        }
-        if ($countSticker) {
-            $this->_getSession()->addSuccess($this->__('%s sticker(s) have been generated.', $countSticker));
-        }
+			$parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels(array(
+			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'stickers/'.implode(';', $parcelsCode),
+			'methodType' => 'GET',
+			'params' => array(
+				'format' => $format,
+				'type' => $type
+			)
+			));
+		}
 
-        if(!is_null($pdf)){
-            return $this->_prepareDownloadResponse(
-                'stickers'.Mage::getSingleton('core/date')->date('Y-m-d_H-i-s').'.pdf', $pdf,
-                'application/pdf'
-            );
-        }else{
-            $this->_redirect('*/*/');
-        }
+		if(@$parcelApi['info']['http_code'] != '200')
+		{
+			$countNonSticker = count($parcelsIds);
+			if(!empty($parcelApi['result']))
+			{
+				foreach(@$parcelApi['result'] as $key => $error)
+				{
+					$this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
+				}
+			}
+		}
+		else
+		{
+			foreach ($parcelsIds as $parcelId)
+			{
+				if(isset($parcelsToPay[$parcelId]))
+				{
+					$parcelDb = Mage::getModel('inpostparcels/inpostparcels')->load($parcelId);
+					$parcelDb->setParcelStatus('Prepared');
+					$parcelDb->setStickerCreationDate(date('Y-m-d H:i:s'));
+					$parcelDb->save();
+				}
+				$countSticker++;
+			}
+			$pdf = base64_decode(@$parcelApi['result']);
+		}
 
-    }
+		if ($countNonSticker)
+		{
+			if ($countNonSticker)
+			{
+				$this->_getSession()->addError($this->__('%s sticker(s) cannot be generated', $countNonSticker));
+			}
+			else
+			{
+				$this->_getSession()->addError($this->__('The sticker(s) cannot be generated'));
+			}
+		}
+		if ($countSticker)
+		{
+			$this->_getSession()->addSuccess($this->__('%s sticker(s) have been generated.', $countSticker));
+		}
 
-    public function massRefreshStatusAction()
-    {
-        $parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
-        $countRefreshStatus = 0;
-        $countNonRefreshStatus = 0;
+		if(!is_null($pdf))
+		{
+			// Check the kind of label that we have created and
+			// output a suitable response.
+			$name = 'stickers' .
+				Mage::getSingleton('core/date')->date('Y-m-d_H-i-s');
+			if(strcasecmp($format, 'pdf') == 0)
+			{
+				$name       .= '.pdf';
+				$output_type = 'application/pdf';
+			}
+			else
+			{
+				$name       .= '.epl2';
+				$output_type = 'application/text';
+			}
 
-        $parcelsCode = array();
-        foreach ($parcelsIds as $id) {
+			return $this->_prepareDownloadResponse($name, $pdf,
+				$output_type);
+		}
+		else
+		{
+			$this->_redirect('*/*/');
+		}
+	}
+
+	///
+	// massRefreshStatusAction
+	//
+	public function massRefreshStatusAction()
+	{
+		$parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
+		$countRefreshStatus = 0;
+		$countNonRefreshStatus = 0;
+
+		$parcelsCode = array();
+		foreach ($parcelsIds as $id)
+		{
             $parcel = Mage::getModel('inpostparcels/inpostparcels')->load($id);
             if($parcel->getParcelId() != ''){
                 $parcelsCode[$id] = $parcel->getParcelId();
@@ -244,21 +317,27 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
             } else {
                 $this->_getSession()->addError($this->__('The parcel cannot be cancel'));
             }
-        }
-        if ($countCancel) {
-            $this->_getSession()->addSuccess($this->__('%s parcel have been cancel.', $countNonCancel));
-        }
-        $this->_redirect('*/*/');
-    }
+		}
+		if ($countCancel)
+		{
+			$this->_getSession()->addSuccess($this->__('%s parcel have been cancel.', $countNonCancel));
+		}
+		$this->_redirect('*/*/');
+	}
 
-    public function massCreateMultipleParcelsAction(){
-        $parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
-        $countParcel = 0;
-        $countNonParcel = 0;
+	///
+	// massCreateMultipleParcelsAction
+	//    
+	public function massCreateMultipleParcelsAction()
+	{
+		$parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
+		$countParcel = 0;
+		$countNonParcel = 0;
 
-        $parcels = array();
+		$parcels = array();
 
-        foreach ($parcelsIds as $id) {
+		foreach ($parcelsIds as $id)
+		{
             $parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
             $orderCollection = Mage::getResourceModel('sales/order_grid_collection')
                 ->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
@@ -353,7 +432,11 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 
     }
 
-    public function editAction(){
+	///
+	// editAction
+	//
+	public function editAction()
+	{
         $id = $this->getRequest()->getParam('id');
         $parcel = Mage::getModel('inpostparcels/inpostparcels')->load($id);
 
@@ -573,19 +656,24 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
         }
     }
 
-    public function saveAction()
-    {
-        if ( $this->getRequest()->getPost() ) {
-            try {
-                $postData = $this->getRequest()->getPost();
-                $id = $postData['id'];
+	///
+	// saveAction
+	//
+	public function saveAction()
+	{
+		if ( $this->getRequest()->getPost() )
+		{
+			try {
+				$postData = $this->getRequest()->getPost();
+				$id = $postData['id'];
 
-                $parcel = Mage::getModel('inpostparcels/inpostparcels')->load($postData['id']);
-                $parcelTargetMachineDetailDb = json_decode($parcel->getParcelTargetMachineDetail());
-                $parcelDetailDb = json_decode($parcel->getParcelDetail());
+				$parcel = Mage::getModel('inpostparcels/inpostparcels')->load($postData['id']);
+				$parcelTargetMachineDetailDb = json_decode($parcel->getParcelTargetMachineDetail());
+				$parcelDetailDb = json_decode($parcel->getParcelDetail());
 
-                if($parcel->getParcelId() != ''){
-                    // update Inpost parcel
+				if($parcel->getParcelId() != '')
+				{
+					// update Inpost parcel
                     $params = array(
                         'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels',
                         'methodType' => 'PUT',
@@ -597,8 +685,10 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
                             //'target_machine' => !isset($postData['parcel_target_machine_id']) || $postData['parcel_target_machine_id'] == $parcel->getParcelTargetMachineId()?null:$postData['parcel_target_machine_id']
                         )
                     );
-                }else{
-                    // create Inpost parcel e.g.
+				}
+				else
+				{
+					// create Inpost parcel e.g.
                     $params = array(
                         'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels',
                         'methodType' => 'POST',
@@ -720,11 +810,14 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
         $this->_redirect('*/*/');
     }
 
-    public function gridAction()
-    {
-        $this->loadLayout();
-        $this->getResponse()->setBody(
-            $this->getLayout()->createBlock('inpostparcels/adminhtml_inpostparcels_grid')->toHtml()
-        );
-    }
+	///
+	// gridAction
+	// 
+	public function gridAction()
+	{
+		$this->loadLayout();
+		$this->getResponse()->setBody(
+			$this->getLayout()->createBlock('inpostparcels/adminhtml_inpostparcels_grid')->toHtml()
+		);
+	}
 }

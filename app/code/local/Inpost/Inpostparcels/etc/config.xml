@@ -4,7 +4,7 @@
 
     <modules>
         <Inpost_Inpostparcels>
-            <version>0.1.3</version>
+            <version>0.1.4</version>
         </Inpost_Inpostparcels>
     </modules>
 
@@ -91,7 +91,8 @@
                         <method>salesOrderShipmentSaveAfter</method>
                     </sales_order_shipment_save_after>
                 </observers>
-            </sales_order_shipment_save_after>
+	    </sales_order_shipment_save_after>
+
 	    <!-- PayPal express change SN -->
             <sales_quote_save_before>
                <!-- Event Called Before Quote Object is saved -->
@@ -104,7 +105,7 @@
                </observers>
             </sales_quote_save_before>
 	    <!-- PayPal express change EN -->
-
+	    
         </events>
 
         <models>
@@ -177,6 +178,7 @@
                 <max_dimension_a>8x38x64</max_dimension_a>
                 <max_dimension_b>19x38x64</max_dimension_b>
                 <max_dimension_c>41x38x64</max_dimension_c>
+                <label_format>Pdf</label_format>
                 <!--<max_height>41</max_height>-->
                 <!--<max_depth>38</max_depth>-->
                 <!--<max_width>64</max_width>-->

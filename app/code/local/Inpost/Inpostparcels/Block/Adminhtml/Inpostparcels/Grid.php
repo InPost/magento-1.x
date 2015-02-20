@@ -18,7 +18,7 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
         $collection = Mage::getModel('inpostparcels/inpostparcels')->getCollection();
         //$collection->addAttributeToFilter('parcel_id', array('notnull' => true));
         $collection->getSelect()->join(
-            array('sfo' => $collection->getTable('sales/order')),
+            array('sfo' => 'sales_flat_order'),
             'sfo.entity_id=order_id'
         );
 
@@ -115,38 +115,52 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
         //$this->addExportType('*/*/exportXml', Mage::helper('inpostparcels')->__('Excel XML'));
         //$this->addExportType('*/*/exportPdf', Mage::helper('inpostparcels')->__('PDF'));
 
-        return parent::_prepareColumns();
-    }
+		return parent::_prepareColumns();
+	}
 
-    protected function _prepareMassaction()
-    {
-        $this->setMassactionIdField('entity_id');
-        $this->getMassactionBlock()->setFormFieldName('parcels_ids');
-        $this->getMassactionBlock()->setUseSelectAll(false);
+	///
+	// _prepareMassaction
+	//
+	protected function _prepareMassaction()
+	{
+		$this->setMassactionIdField('entity_id');
+		$this->getMassactionBlock()->setFormFieldName('parcels_ids');
+		$this->getMassactionBlock()->setUseSelectAll(false);
+	
+		$format = Mage::getStoreConfig('carriers/inpostparcels/label_format');
+		if(strcasecmp($format, 'pdf') == 0)
+		{
+			$label = 'Parcel stickers in PDF format';
+		}
+		else
+		{
+			$label = 'Parcel stickers in Epl2 format';
+		}
 
-        $this->getMassactionBlock()->addItem('stickers', array(
-            'label'    => Mage::helper('inpostparcels')->__('Parcel stickers in pdf format'),
-            'url'      => $this->getUrl('*/*/massStickers')
-        ));
+		$this->getMassactionBlock()->addItem('stickers',
+			array(
+			'label'    => Mage::helper('inpostparcels')->__($label),
+			'url'      => $this->getUrl('*/*/massStickers')
+		));
 
-        $this->getMassactionBlock()->addItem('status', array(
-            'label'    => Mage::helper('inpostparcels')->__('Parcel refresh status'),
-            'url'      => $this->getUrl('*/*/massRefreshStatus')
-        ));
+		$this->getMassactionBlock()->addItem('status', array(
+		'label'    => Mage::helper('inpostparcels')->__('Parcel refresh status'),
+		'url'      => $this->getUrl('*/*/massRefreshStatus')
+		));
 
-        $this->getMassactionBlock()->addItem('parcels', array(
-            'label'    => Mage::helper('inpostparcels')->__('Create multiple parcels'),
-            'url'      => $this->getUrl('*/*/massCreateMultipleParcels')
-        ));
+		$this->getMassactionBlock()->addItem('parcels', array(
+		'label'    => Mage::helper('inpostparcels')->__('Create multiple parcels'),
+		'url'      => $this->getUrl('*/*/massCreateMultipleParcels')
+		));
 
-        $this->getMassactionBlock()->addItem('cancel', array(
-            'label'    => Mage::helper('inpostparcels')->__('Cancel'),
-            'url'      => $this->getUrl('*/*/massCancel'),
-            'confirm'  => Mage::helper('inpostparcels')->__('Are you sure?')
-        ));
+		$this->getMassactionBlock()->addItem('cancel', array(
+		'label'    => Mage::helper('inpostparcels')->__('Cancel'),
+		'url'      => $this->getUrl('*/*/massCancel'),
+		'confirm'  => Mage::helper('inpostparcels')->__('Are you sure?')
+		));
 
-        return $this;
-    }
+		return $this;
+	}
 
 //    public function getRowUrl($row)
 //    {
