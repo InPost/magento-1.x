@@ -91,6 +91,17 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
             'gmtoffset' => true
         ));
 
+	// Show the user if they have already created a Return Parcel for the
+	// main parcel.
+        $this->addColumn('return_parcel_id', array(
+            'header'    => Mage::helper('inpostparcels')->__('Ret'),
+            'index'     => 'return_parcel_id',
+            'width'     => '10px',
+            'align'     => 'center',
+//	    'class'     => '',
+	    'renderer'  => 'Mage_Adminhtml_Block_Inpostparcels_Renderer_Return'
+        ));
+
         $this->addColumn('action',
             array(
                 'header'    =>  Mage::helper('inpostparcels')->__('Action'),
@@ -144,14 +155,31 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
 		));
 
 		$this->getMassactionBlock()->addItem('status', array(
-		'label'    => Mage::helper('inpostparcels')->__('Parcel refresh status'),
+		'label'    => Mage::helper('inpostparcels')->__('Parcel Refresh Status'),
 		'url'      => $this->getUrl('*/*/massRefreshStatus')
 		));
 
 		$this->getMassactionBlock()->addItem('parcels', array(
-		'label'    => Mage::helper('inpostparcels')->__('Create multiple parcels'),
+		'label'    => Mage::helper('inpostparcels')->__('Create Multiple Parcels'),
 		'url'      => $this->getUrl('*/*/massCreateMultipleParcels')
 		));
+
+		// Check to see if we should allow the creation of Return
+		// parcel labels.
+		$returns_allowed = Mage::getStoreConfig('carriers/inpostparcels/allow_return_parcels');
+		$default_returns = Mage::getStoreConfig('carriers/inpostparcels/default_return_parcels');
+
+		// Only allow the user to create returns if it is switched on
+		// and default is set to be no.
+		if($returns_allowed == true && $default_returns == false)
+		{
+			$this->getMassactionBlock()->addItem('parcels',
+				array(
+					'label' => Mage::helper('inpostparcels')->__('Create Multiple Returns Parcels'),
+					'url'   => $this->getUrl('*/*/massCreateMultipleReturnParcels')
+				)
+			);
+		}
 
 		$this->getMassactionBlock()->addItem('cancel', array(
 		'label'    => Mage::helper('inpostparcels')->__('Cancel'),

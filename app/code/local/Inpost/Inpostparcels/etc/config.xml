@@ -4,7 +4,7 @@
 
     <modules>
         <Inpost_Inpostparcels>
-            <version>0.1.4</version>
+            <version>0.1.5</version>
         </Inpost_Inpostparcels>
     </modules>
 
@@ -179,6 +179,9 @@
                 <max_dimension_b>19x38x64</max_dimension_b>
                 <max_dimension_c>41x38x64</max_dimension_c>
                 <label_format>Pdf</label_format>
+                <allow_return_parcels>0</allow_return_parcels>
+                <default_return_parcels>0</default_return_parcels>
+                <expiry_return_parcels>30</expiry_return_parcels>
                 <!--<max_height>41</max_height>-->
                 <!--<max_depth>38</max_depth>-->
                 <!--<max_width>64</max_width>-->

@@ -820,4 +820,159 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 			$this->getLayout()->createBlock('inpostparcels/adminhtml_inpostparcels_grid')->toHtml()
 		);
 	}
+
+	///
+	// massCreateMultipleReturnParcelsAction
+	//  
+	// We will go through the list of parcels selected by the user.
+	// We will process only the ones that have Parcel Id's against them,
+	// as the email and phone number of the customer have been finalised
+	// by then.
+	public function massCreateMultipleReturnParcelsAction()
+	{
+		// Check to see if the required data is available to allow us
+		// to create a returns parcel or not.
+		$days_to_add  = Mage::getStoreConfig('carriers/inpostparcels/expiry_return_parcels');
+
+		$fail = false;
+
+		if($days_to_add == 0)
+		{
+			// Can't continue.
+			$message = $this->__("Please allow the recipient more days to collect their parcel.");
+			Mage::getSingleton("core/session")->addError($message);
+			$fail = true;
+		}
+
+		if($fail == true)
+		{
+			// return and display the error(s) to the user.
+			$message = $this->__("Cannot create a Return Parcel without the above error(s) being fixed.");
+			Mage::getSingleton("core/session")->addWarning($message);
+			// Do a redirect to get the page to show the error(s).
+        		$this->_redirect('*/*/');
+			return;
+		}
+
+		$parcelsIds     = $this->getRequest()->getPost('parcels_ids',
+			array());
+		$countParcel    = 0;
+		$countNonParcel = 0;
+
+		$parcels = array();
+
+		Mage::log("About to go through the parcels.");
+
+		foreach ($parcelsIds as $id)
+		{
+			Mage::log("Going through the parcels.");
+
+			$parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
+			$orderCollection = Mage::getResourceModel('sales/order_grid_collection')
+			->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
+			->getFirstItem();
+
+			if($parcelCollection->getParcelId() == '')
+			{
+				Mage::log("Failing because of the parcel status");
+				$countNonParcel++;
+				continue;
+			}
+			$parcelDetailDb = json_decode($parcelCollection->getParcelDetail());
+
+			$expiry_date  = date("Y-m-d", time() + $days_to_add);
+
+			Mage::log("The parcel details information =");
+			Mage::log($parcelDetailDb);
+
+			// The mobile number saved is only the last 9 digits,
+			// we need 10 for the returns process. Add a 7 to the
+			// start of the number.
+			$sender_phone = "7" . $parcelDetailDb->receiver->phone;
+			$sender_email = $parcelDetailDb->receiver->email;
+
+			Mage::log("Sender phone =" . $sender_phone . ".");
+			Mage::log("Sender email =" . $sender_email . ".");
+
+			// create Inpost Return parcel
+			$params = array(
+				'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'reverselogistics.json',
+				'methodType'   => 'POST',
+				'params'       => array(
+				'parcel_size'  => $parcelDetailDb->size,
+				'expire_at'    => $expiry_date,
+				'sender_phone' => $sender_phone,
+				'sender_email' => $sender_email,
+				'with_label'   => 'TRUE',
+				)
+			);
+
+			// Do the REST call.
+			$parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels($params);
+
+			Mage::log("Result from the API call is.");
+			Mage::log($parcelApi);
+
+			if(@$parcelApi['info']['http_code'] != '204' &&
+				@$parcelApi['info']['http_code'] != '201')
+			{
+				if(!empty($parcelApi['result']))
+				{
+					foreach(@$parcelApi['result'] as $key => $error)
+					{
+						if(is_array($error))
+						{
+							foreach($error as $subKey => $subError)
+							{
+								$this->_getSession()->addError($this->__('Parcel %s '.
+									$subError,
+									$key .
+									' ' .
+									$id));
+							}
+						}
+						else
+						{
+							$this->_getSession()->addError($this->__('Parcel %s '.
+								$error,
+								$key));
+						}
+					}
+				}
+				$countNonParcel++;
+			}
+			else
+			{
+				$parcel_id     = $parcelApi['result']->code;
+				$actual_expiry = $parcelApi['result']->expire_at;
+
+				$parcelCollection->setReturnParcelId($parcel_id);
+				$parcelCollection->setReturnParcelExpiry($actual_expiry);
+				$parcelCollection->setReturnParcelCreated(date('Y-m-d H:i:s'));
+				$parcelCollection->save();
+				$countParcel++;
+			}
+		}
+
+		if ($countNonParcel)
+		{
+			if ($countNonParcel)
+			{
+				$this->_getSession()->addError($this->__('%s Return parcel(s) cannot be created', $countNonParcel));
+			}
+			else
+			{
+				$this->_getSession()->addError($this->__('The Return parcel(s) cannot be created'));
+			}
+		}
+		if ($countParcel)
+		{
+			$this->_getSession()->addSuccess(
+				$this->__('%s Return parcel(s) have been created.',
+				$countParcel));
+		}
+
+		$this->_redirect('*/*/');
+	}
+
 }
