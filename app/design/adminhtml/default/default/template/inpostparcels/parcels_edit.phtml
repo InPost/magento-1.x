@@ -1,44 +1,50 @@
 <script type="text/javascript" src="<?php echo Mage::helper('inpostparcels/data')->getGeowidgetUrl(); ?>"></script>
 <script type="text/javascript">
-    function user_function(value) {
+//<![CDATA[
+function user_function(value)
+{
+	var address = value.split(';');
+	var openIndex = address[4];
+	var sufix = '';
 
-        var address = value.split(';');
-        var openIndex = address[4];
-        var sufix = '';
+	if(openIndex == 'source_machine')
+	{
+		sufix = '_source';
+	}
 
-        if(openIndex == 'source_machine') {
-            sufix = '_source';
-        }
+	//document.getElementById('town').value=address[1];
+	//document.getElementById('street').value=address[2]+address[3];
+	var box_machine_name = document.getElementById('name').value;
+	var box_machine_town = document.value=address[1];
+	var box_machine_street = document.value=address[2];
 
-        //document.getElementById('town').value=address[1];
-        //document.getElementById('street').value=address[2]+address[3];
-        var box_machine_name = document.getElementById('name').value;
-        var box_machine_town = document.value=address[1];
-        var box_machine_street = document.value=address[2];
+	var is_value = 0;
+	document.getElementById('shipping_inpostparcels'+sufix).value = box_machine_name;
+	var shipping_inpostparcels = document.getElementById('shipping_inpostparcels'+sufix);
 
+	for(i=0;i<shipping_inpostparcels.length;i++)
+	{
+		if(shipping_inpostparcels.options[i].value == document.getElementById('name').value)
+		{
+			shipping_inpostparcels.selectedIndex = i;
+			is_value = 1;
+		}
+	}
 
-        var is_value = 0;
-        document.getElementById('shipping_inpostparcels'+sufix).value = box_machine_name;
-        var shipping_inpostparcels = document.getElementById('shipping_inpostparcels'+sufix);
-
-        for(i=0;i<shipping_inpostparcels.length;i++){
-            if(shipping_inpostparcels.options[i].value == document.getElementById('name').value){
-                shipping_inpostparcels.selectedIndex = i;
-                is_value = 1;
-            }
-        }
-
-        if (is_value == 0){
-            shipping_inpostparcels.options[shipping_inpostparcels.options.length] = new Option(box_machine_name+','+box_machine_town+','+box_machine_street, box_machine_name);
-            shipping_inpostparcels.selectedIndex = shipping_inpostparcels.length-1;
-        }
-    }
+	if (is_value == 0)
+	{
+		shipping_inpostparcels.options[shipping_inpostparcels.options.length] = new Option(box_machine_name + ',' +
+			box_machine_town + ',' +
+			box_machine_street,
+			box_machine_name);
+		shipping_inpostparcels.selectedIndex = shipping_inpostparcels.length-1;
+	}
+}
+//]]>
 </script>
 
 <?php
 $inpostparcelsData = Mage::registry('inpostparcelsData');
-
-
 ?>
 
 <div class="content-header">
@@ -61,18 +67,21 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
         <fieldset id="my-fieldset">
             <table cellspacing="0" class="form-list">
 
+<!-- *********************** Polish only code start ********************** -->
                 <?php if(in_array(Mage::registry('api_source'), array('PL'))): ?>
                 <tr>
                     <td class="label"><?php echo $this->__('Cod amount'); ?>:</td>
                     <td class="input-ele"><input class="input-text" name="parcel_cod_amount" value="<?php echo $inpostparcelsData['parcel_cod_amount']; ?>" <?php echo Mage::registry('disabledCodAmount'); ?> <?php ?>/></td>
                 </tr>
                 <?php endif; ?>
+<!-- *********************** Polish only code end   ********************** -->
 
                 <tr>
                     <td class="label"><?php echo $this->__('Description'); ?>:</td>
                     <td class="input-ele"><textarea class="input-text required-entry" name="parcel_description" rows="10" cols="50" <?php echo Mage::registry('disabledDescription'); ?>><?php echo $inpostparcelsData['parcel_description']; ?></textarea></td>
                 </tr>
 
+<!-- *********************** Polish only code start ********************** -->
                 <?php if(in_array(Mage::registry('api_source'), array('PL'))): ?>
                 <tr>
                     <td class="label"><?php echo $this->__('Insurance amount'); ?>:</td>
@@ -86,6 +95,7 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                     </td>
                 </tr>
                 <?php endif; ?>
+<!-- *********************** Polish only code end   ********************** -->
 
                 <tr>
                     <td class="label"><?php echo $this->__('Receiver phone'); ?>:<span class="required">*</span></td>
@@ -116,6 +126,7 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                 </tr>
                 <?php endif; ?>
 
+<!-- *********************** Polish only code start ********************** -->
                 <?php if(in_array(Mage::registry('api_source'), array('PL'))): ?>
                 <tr>
                     <td class="label"><?php echo $this->__('Source machine'); ?>:</td>
@@ -131,6 +142,7 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                     </td>
                 </tr>
                 <?php endif; ?>
+<!-- *********************** Polish only code end   ********************** -->
 
                 <tr>
                     <td class="label"><?php echo $this->__('Tmp id'); ?>:<span class="required">*</span></td>
@@ -154,6 +166,20 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
                     </td>
                 </tr>
 
+<!-- Start of the fields for the Return Parcel details -->
+		<tr>
+                    <td class="label"><?php echo $this->__('Return Parcel RR'); ?>:</td>
+                    <td class="input-ele">
+                    <input class="input-text required-entry" name="return_parcel_id" value="<?php echo $inpostparcelsData['return_parcel_id']; ?>" disabled="disabled" />
+		    </td>
+		</tr>
+		<tr>
+                    <td class="label"><?php echo $this->__('Return Parcel Expiry Date'); ?>:</td>
+                    <td class="input-ele">
+                    <input class="input-text required-entry" name="return_parcel_expiry" value="<?php echo $inpostparcelsData['return_parcel_expiry']; ?>" disabled="disabled" />
+		    </td>
+		</tr>
+<!-- End   of the fields for the Return Parcel details -->
             </table>
         </fieldset>
     </form>

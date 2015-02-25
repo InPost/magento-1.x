@@ -254,10 +254,13 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
             $this->_getSession()->addSuccess($this->__('%s parcel status have been refresh.', $countRefreshStatus));
         }
         $this->_redirect('*/*/');
-    }
+	}
 
-    public function massCancelAction()
-    {
+	///
+	// massCancelAction
+	//
+	public function massCancelAction()
+	{
         $parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
         $countCancel = 0;
         $countNonCancel = 0;
@@ -429,232 +432,257 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
         }
 
         $this->_redirect('*/*/');
-
-    }
+	}
 
 	///
 	// editAction
 	//
 	public function editAction()
 	{
-        $id = $this->getRequest()->getParam('id');
-        $parcel = Mage::getModel('inpostparcels/inpostparcels')->load($id);
+		Mage::log('in editAction method.');
 
-        if ($parcel->getId() || $id == 0) {
-            $parcelTargetMachineDetailDb = json_decode($parcel->getParcelTargetMachineDetail());
-            $parcelDetailDb = json_decode($parcel->getParcelDetail());
+		$id = $this->getRequest()->getParam('id');
+		$parcel = Mage::getModel('inpostparcels/inpostparcels')->load($id);
 
-            // set disabled
-            $disabledCodAmount = '';
-            $disabledDescription = '';
-            $disabledInsuranceAmount = '';
-            $disabledReceiverPhone = '';
-            $disabledReceiverEmail = '';
-            $disabledParcelSize = '';
-            $disabledParcelStatus = '';
-            $disabledSourceMachine = '';
-            $disabledTmpId = '';
-            $disabledTargetMachine = '';
+		if ($parcel->getId() || $id == 0)
+		{
+			$parcelTargetMachineDetailDb = json_decode($parcel->getParcelTargetMachineDetail());
+			$parcelDetailDb = json_decode($parcel->getParcelDetail());
 
-            if($parcel->getParcelStatus() != 'Created' && $parcel->getParcelStatus() != ''){
-                $disabledCodAmount = 'disabled';
-                $disabledDescription = 'disabled';
-                $disabledInsuranceAmount = 'disabled';
-                $disabledReceiverPhone = 'disabled';
-                $disabledReceiverEmail = 'disabled';
-                $disabledParcelSize = 'disabled';
-                $disabledParcelStatus = 'disabled';
-                $disabledSourceMachine = 'disabled';
-                $disabledTmpId = 'disabled';
-                $disabledTargetMachine = 'disabled';
-            }
-            if($parcel->getParcelStatus() == 'Created'){
-                $disabledCodAmount = 'disabled';
-                //$disabledDescription = 'disabled';
-                $disabledInsuranceAmount = 'disabled';
-                $disabledReceiverPhone = 'disabled';
-                $disabledReceiverEmail = 'disabled';
-                //$disabledParcelSize = 'disabled';
-                //$disabledParcelStatus = 'disabled';
-                $disabledSourceMachine = 'disabled';
-                $disabledTmpId = 'disabled';
-                $disabledTargetMachine = 'disabled';
-            }
+			// set disabled
+			$disabledCodAmount       = '';
+			$disabledDescription     = '';
+			$disabledInsuranceAmount = '';
+			$disabledReceiverPhone   = '';
+			$disabledReceiverEmail   = '';
+			$disabledParcelSize      = '';
+			$disabledParcelStatus    = '';
+			$disabledSourceMachine   = '';
+			$disabledTmpId           = '';
+			$disabledTargetMachine   = '';
 
-            Mage::register('disabledCodAmount', $disabledCodAmount);
-            Mage::register('disabledDescription', $disabledDescription);
-            Mage::register('disabledInsuranceAmount', $disabledInsuranceAmount);
-            Mage::register('disabledReceiverPhone', $disabledReceiverPhone);
-            Mage::register('disabledReceiverEmail', $disabledReceiverEmail);
-            Mage::register('disabledParcelSize', $disabledParcelSize);
-            Mage::register('disabledParcelStatus', $disabledParcelStatus);
-            Mage::register('disabledSourceMachine', $disabledSourceMachine);
-            Mage::register('disabledTmpId', $disabledTmpId);
-            Mage::register('disabledTargetMachine', $disabledTargetMachine);
+			if($parcel->getParcelStatus() != 'Created' && $parcel->getParcelStatus() != '')
+			{
+				$disabledCodAmount       = 'disabled';
+				$disabledDescription     = 'disabled';
+				$disabledInsuranceAmount = 'disabled';
+				$disabledReceiverPhone   = 'disabled';
+				$disabledReceiverEmail   = 'disabled';
+				$disabledParcelSize      = 'disabled';
+				$disabledParcelStatus    = 'disabled';
+				$disabledSourceMachine   = 'disabled';
+				$disabledTmpId           = 'disabled';
+				$disabledTargetMachine   = 'disabled';
+			}
+			if($parcel->getParcelStatus() == 'Created')
+			{
+				$disabledCodAmount = 'disabled';
+				//$disabledDescription = 'disabled';
+				$disabledInsuranceAmount = 'disabled';
+				$disabledReceiverPhone = 'disabled';
+				$disabledReceiverEmail = 'disabled';
+				//$disabledParcelSize = 'disabled';
+				//$disabledParcelStatus = 'disabled';
+				$disabledSourceMachine = 'disabled';
+				$disabledTmpId = 'disabled';
+				$disabledTargetMachine = 'disabled';
+			}
 
-            $allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
-                array(
-                    'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
-                    'methodType' => 'GET',
-                    'params' => array(
-                    )
-                )
-            );
+			Mage::register('disabledCodAmount', $disabledCodAmount);
+			Mage::register('disabledDescription', $disabledDescription);
+			Mage::register('disabledInsuranceAmount', $disabledInsuranceAmount);
+			Mage::register('disabledReceiverPhone', $disabledReceiverPhone);
+			Mage::register('disabledReceiverEmail', $disabledReceiverEmail);
+			Mage::register('disabledParcelSize', $disabledParcelSize);
+			Mage::register('disabledParcelStatus', $disabledParcelStatus);
+			Mage::register('disabledSourceMachine', $disabledSourceMachine);
+			Mage::register('disabledTmpId', $disabledTmpId);
+			Mage::register('disabledTargetMachine', $disabledTargetMachine);
 
-            // target machines
-            $parcelTargetAllMachinesId = array();
-            $parcelTargetAllMachinesDetail = array();
-            $machines = array();
-            if(is_array(@$allMachines['result']) && !empty($allMachines['result'])){
-                foreach($allMachines['result'] as $key => $machine){
-                    if(in_array($parcel->getApiSource(), array('PL'))){
-                        if($machine->payment_available == false){
-                            continue;
-                        }
-                    }
+			$allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
+			array(
+			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
+			'methodType' => 'GET',
+			'params' => array()
+			)
+			);
 
-                    $parcelTargetAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
-                    $parcelTargetAllMachinesDetail[$machine->id] = array(
-                        'id' => $machine->id,
-                        'address' => array(
-                            'building_number' => @$machine->address->building_number,
-                            'flat_number' => @$machine->address->flat_number,
-                            'post_code' => @$machine->address->post_code,
-                            'province' => @$machine->address->province,
-                            'street' => @$machine->address->street,
-                            'city' => @$machine->address->city
-                        )
-                    );
-                    if($machine->address->post_code == @$parcelTargetMachineDetailDb->address->post_code){
-                        $machines[$key] = $machine;
-                        continue;
-                    }elseif($machine->address->city == @$parcelTargetMachineDetailDb->address->city){
-                        $machines[$key] = $machine;
-                    }
-                }
-            }
-            Mage::register('parcelTargetAllMachinesId', $parcelTargetAllMachinesId);
-            Mage::register('parcelTargetAllMachinesDetail', $parcelTargetAllMachinesDetail);
+			// target machines
+			$parcelTargetAllMachinesId = array();
+			$parcelTargetAllMachinesDetail = array();
+			$machines = array();
+			if(is_array(@$allMachines['result']) && !empty($allMachines['result']))
+			{
+				foreach($allMachines['result'] as $key => $machine)
+				{
+					if(in_array($parcel->getApiSource(), array('PL')))
+					{
+						if($machine->payment_available == false)
+						{
+							// Polish machines MUST have payment available.
+							continue;
+						}
+					}
 
-            $parcelTargetMachinesId = array();
-            $parcelTargetMachinesDetail = array();
-            $defaultTargetMachine = $this->__('Select Machine..');
-            if(is_array(@$machines) && !empty($machines)){
-                foreach($machines as $key => $machine){
-                    $parcelTargetMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
-                    $parcelTargetMachinesDetail[$machine->id] = $parcelTargetAllMachinesDetail[$machine->id];
-                }
-            }else{
-                $defaultTargetMachine = $this->__('no terminals in your city');
-            }
-            Mage::register('parcelTargetMachinesId', $parcelTargetMachinesId);
-            Mage::register('parcelTargetMachinesDetail', $parcelTargetMachinesDetail);
-            Mage::register('defaultTargetMachine', $defaultTargetMachine);
+					$parcelTargetAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
+					$parcelTargetAllMachinesDetail[$machine->id] = array(
+					'id' => $machine->id,
+					'address' => array(
+					'building_number' => @$machine->address->building_number,
+					'flat_number' => @$machine->address->flat_number,
+					'post_code' => @$machine->address->post_code,
+					'province' => @$machine->address->province,
+					'street' => @$machine->address->street,
+					'city' => @$machine->address->city
+					)
+					);
+					if($machine->address->post_code == @$parcelTargetMachineDetailDb->address->post_code)
+					{
+						$machines[$key] = $machine;
+						continue;
+					}
+					elseif($machine->address->city == @$parcelTargetMachineDetailDb->address->city)
+					{
+						$machines[$key] = $machine;
+					}
+				}
+			}
+			Mage::register('parcelTargetAllMachinesId', $parcelTargetAllMachinesId);
+			Mage::register('parcelTargetAllMachinesDetail', $parcelTargetAllMachinesDetail);
 
-            //$parcel['api_source'] = 'PL';
-            $parcelInsurancesAmount = array();
-            $defaultInsuranceAmount = $this->__('Select insurance');
-            switch($parcel->getApiSource()){
-                case 'PL':
-                    $api = Mage::helper('inpostparcels/data')->connectInpostparcels(
-                        array(
-                            'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'customer/pricelist',
-                            'methodType' => 'GET',
-                            'params' => array(
-                            )
-                        )
-                    );
+			$parcelTargetMachinesId = array();
+			$parcelTargetMachinesDetail = array();
+			$defaultTargetMachine = $this->__('Select Machine..');
+			if(is_array(@$machines) && !empty($machines))
+			{
+				foreach($machines as $key => $machine)
+				{
+					$parcelTargetMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
+					$parcelTargetMachinesDetail[$machine->id] = $parcelTargetAllMachinesDetail[$machine->id];
+				}
+			}
+			else
+			{
+				$defaultTargetMachine = $this->__('no terminals in your city');
+			}
+			Mage::register('parcelTargetMachinesId', $parcelTargetMachinesId);
+			Mage::register('parcelTargetMachinesDetail', $parcelTargetMachinesDetail);
+			Mage::register('defaultTargetMachine', $defaultTargetMachine);
 
-                    if(isset($api['result']) && !empty($api['result'])){
-                        $parcelInsurancesAmount = array(
-                            ''.$api['result']->insurance_price1.'' => $api['result']->insurance_price1,
-                            ''.$api['result']->insurance_price2.'' => $api['result']->insurance_price2,
-                            ''.$api['result']->insurance_price3.'' => $api['result']->insurance_price3
-                        );
-                    }
+			//$parcel['api_source'] = 'PL';
+			$parcelInsurancesAmount = array();
+			$defaultInsuranceAmount = $this->__('Select insurance');
+			switch($parcel->getApiSource())
+			{
+				case 'PL':
+				$api = Mage::helper('inpostparcels/data')->connectInpostparcels(
+				array(
+				'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'customer/pricelist',
+				'methodType' => 'GET',
+				'params' => array()
+				)
+				);
 
-                    $parcelSourceAllMachinesId = array();
-                    $parcelSourceAllMachinesDetail = array();
-                    $machines = array();
-                    $shopCities = explode(',',Mage::getStoreConfig('carriers/inpostparcels/shop_cities'));
-                    if(is_array(@$allMachines['result']) && !empty($allMachines['result'])){
-                        foreach($allMachines['result'] as $key => $machine){
-                            $parcelSourceAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
-                            $parcelSourceAllMachinesDetail[$machine->id] = array(
-                                'id' => $machine->id,
-                                'address' => array(
-                                    'building_number' => @$machine->address->building_number,
-                                    'flat_number' => @$machine->address->flat_number,
-                                    'post_code' => @$machine->address->post_code,
-                                    'province' => @$machine->address->province,
-                                    'street' => @$machine->address->street,
-                                    'city' => @$machine->address->city
-                                )
-                            );
-                            if(in_array($machine->address->city, $shopCities)){
-                                $machines[$key] = $machine;
-                            }
-                        }
-                    }
-                    Mage::register('parcelInsurancesAmount', $parcelInsurancesAmount);
-                    Mage::getSingleton('adminhtml/session')->setParcelInsuranceAmount($parcelInsurancesAmount);
-                    Mage::register('defaultInsuranceAmount', $defaultInsuranceAmount);
-                    Mage::register('parcelSourceAllMachinesId', $parcelSourceAllMachinesId);
-                    Mage::register('parcelSourceAllMachinesDetail', $parcelSourceAllMachinesDetail);
-                    Mage::register('shopCities', $shopCities);
+				if(isset($api['result']) && !empty($api['result']))
+				{
+					$parcelInsurancesAmount = array(
+					''.$api['result']->insurance_price1.'' => $api['result']->insurance_price1,
+					''.$api['result']->insurance_price2.'' => $api['result']->insurance_price2,
+					''.$api['result']->insurance_price3.'' => $api['result']->insurance_price3
+					);
+				}
 
-                    $parcelSourceMachinesId = array();
-                    $parcelSourceMachinesDetail = array();
-                    $defaultSourceMachine = $this->__('Select Machine..');
-                    if(is_array(@$machines) && !empty($machines)){
-                        foreach($machines as $key => $machine){
-                            $parcelSourceMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
-                            $parcelSourceMachinesDetail[$machine->id] = $parcelSourceAllMachinesDetail[$machine->id];
-                        }
-                    }else{
-                        $defaultTargetMachine = $this->__('no terminals in your city');
-                        if(@$parcelDetailDb->source_machine != ''){
-                            $parcelSourceMachinesId[$parcelDetailDb->source_machine] = @$parcelSourceAllMachinesId[$parcelDetailDb->source_machine];
-                            $parcelSourceMachinesDetail[$parcelDetailDb->source_machine] = @$parcelSourceMachinesDetail[$parcelDetailDb->source_machine];
-                        }
-                    }
+				$parcelSourceAllMachinesId = array();
+				$parcelSourceAllMachinesDetail = array();
+				$machines = array();
+				$shopCities = explode(',',Mage::getStoreConfig('carriers/inpostparcels/shop_cities'));
+				if(is_array(@$allMachines['result']) && !empty($allMachines['result']))
+				{
+					foreach($allMachines['result'] as $key => $machine)
+					{
+						$parcelSourceAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
+						$parcelSourceAllMachinesDetail[$machine->id] = array(
+						'id' => $machine->id,
+						'address' => array(
+						'building_number' => @$machine->address->building_number,
+						'flat_number' => @$machine->address->flat_number,
+						'post_code' => @$machine->address->post_code,
+						'province' => @$machine->address->province,
+						'street' => @$machine->address->street,
+						'city' => @$machine->address->city
+						)
+						);
+						if(in_array($machine->address->city, $shopCities)){
+						$machines[$key] = $machine;
+						}
+					}
+				}
+				Mage::register('parcelInsurancesAmount', $parcelInsurancesAmount);
+				Mage::getSingleton('adminhtml/session')->setParcelInsuranceAmount($parcelInsurancesAmount);
+				Mage::register('defaultInsuranceAmount', $defaultInsuranceAmount);
+				Mage::register('parcelSourceAllMachinesId', $parcelSourceAllMachinesId);
+				Mage::register('parcelSourceAllMachinesDetail', $parcelSourceAllMachinesDetail);
+				Mage::register('shopCities', $shopCities);
 
-                    Mage::register('parcelSourceMachinesId', $parcelSourceMachinesId);
-                    Mage::register('parcelSourceMachinesDetail', $parcelSourceMachinesDetail);
-                    Mage::register('defaultSourceMachine', $defaultTargetMachine);
+				$parcelSourceMachinesId = array();
+				$parcelSourceMachinesDetail = array();
+				$defaultSourceMachine = $this->__('Select Machine..');
+				if(is_array(@$machines) && !empty($machines))
+				{
+					foreach($machines as $key => $machine)
+					{
+						$parcelSourceMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
+						$parcelSourceMachinesDetail[$machine->id] = $parcelSourceAllMachinesDetail[$machine->id];
+					}
+				}
+				else
+				{
+					$defaultTargetMachine = $this->__('no terminals in your city');
+					if(@$parcelDetailDb->source_machine != '')
+					{
+						$parcelSourceMachinesId[$parcelDetailDb->source_machine] = @$parcelSourceAllMachinesId[$parcelDetailDb->source_machine];
+						$parcelSourceMachinesDetail[$parcelDetailDb->source_machine] = @$parcelSourceMachinesDetail[$parcelDetailDb->source_machine];
+					}
+				}
 
-                    break;
-            }
+				Mage::register('parcelSourceMachinesId', $parcelSourceMachinesId);
+				Mage::register('parcelSourceMachinesDetail', $parcelSourceMachinesDetail);
+				Mage::register('defaultSourceMachine', $defaultTargetMachine);
 
-            $inpostparcelsData = array(
-                'id' => $parcel->getId(),
-                'parcel_id' => $parcel->getParcelId(),
+			break;
+			}
 
-                'parcel_cod_amount' => @$parcelDetailDb->cod_amount,
-                'parcel_description' => @$parcelDetailDb->description,
-                'parcel_insurance_amount' => @$parcelDetailDb->insurance_amount,
-                'parcel_receiver_phone' => @$parcelDetailDb->receiver->phone,
-                'parcel_receiver_email' => @$parcelDetailDb->receiver->email,
-                'parcel_size' => @$parcelDetailDb->size,
-                'parcel_status' => $parcel->getParcelStatus(),
-                'parcel_source_machine_id' => @$parcelDetailDb->source_machine,
-                'parcel_tmp_id' => @$parcelDetailDb->tmp_id,
-                'parcel_target_machine_id' => @$parcelDetailDb->target_machine,
-            );
-            Mage::register('inpostparcelsData', $inpostparcelsData);
-            Mage::register('api_source', $parcel->getApiSource());
+			$inpostparcelsData = array(
+			'id' => $parcel->getId(),
+			'parcel_id'                => $parcel->getParcelId(),
+			'parcel_cod_amount'        => @$parcelDetailDb->cod_amount,
+			'parcel_description'       => @$parcelDetailDb->description,
+			'parcel_insurance_amount'  => @$parcelDetailDb->insurance_amount,
+			'parcel_receiver_phone'    => @$parcelDetailDb->receiver->phone,
+			'parcel_receiver_email'    => @$parcelDetailDb->receiver->email,
+			'parcel_size'              => @$parcelDetailDb->size,
+			'parcel_status'            => $parcel->getParcelStatus(),
+			'parcel_source_machine_id' => @$parcelDetailDb->source_machine,
+			'parcel_tmp_id'            => @$parcelDetailDb->tmp_id,
+			'parcel_target_machine_id' => @$parcelDetailDb->target_machine,
+			// Return Parcel Details
+			'return_parcel_id'     => @$parcelDetailDb->return_parcel_id,
+			'return_parcel_expiry' => @$parcelDetailDb->return_parcel_expiry,
+			);
+			Mage::register('inpostparcelsData', $inpostparcelsData);
+			Mage::register('api_source', $parcel->getApiSource());
 
-            $defaultParcelSize = @$parcelDetailDb->size;
-            Mage::register('defaultParcelSize', $defaultParcelSize);
+			$defaultParcelSize = @$parcelDetailDb->size;
+			Mage::register('defaultParcelSize', $defaultParcelSize);
 
-            $this->_initAction()
-                ->renderLayout();
-
-        } else {
-            Mage::getSingleton('adminhtml/session')->addError(Mage::helper('<module>')->__('Item does not exist'));
-            $this->_redirect('*/*/');
-        }
-    }
+			$this->_initAction()->renderLayout();
+		}
+		else
+		{
+			Mage::getSingleton('adminhtml/session')->addError(Mage::helper('<module>')->__('Item does not exist'));
+			$this->_redirect('*/*/');
+		}
+	}
 
 	///
 	// saveAction
