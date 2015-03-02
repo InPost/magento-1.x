@@ -40,7 +40,6 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
             'header'    => Mage::helper('inpostparcels')->__('Order ID'),
             'width'     => '10px',
             'index'     => 'increment_id',
-            'width'     => '10px',
         ));
 
         $this->addColumn('parcel_id', array(
@@ -94,18 +93,19 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
 	// Show the user if they have already created a Return Parcel for the
 	// main parcel.
         $this->addColumn('return_parcel_id', array(
-            'header'    => Mage::helper('inpostparcels')->__('Ret'),
-            'index'     => 'return_parcel_id',
-            'width'     => '10px',
-            'align'     => 'center',
-//	    'class'     => '',
-	    'renderer'  => 'Mage_Adminhtml_Block_Inpostparcels_Renderer_Return'
+		'header'    => Mage::helper('inpostparcels')->__('Ret'),
+		'index'     => 'return_parcel_id',
+		'width'     => '10px',
+		'align'     => 'center',
+		'renderer'  => new Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Renderer_Return(),
+                'filter'    => false,
+                'sortable'  => false
         ));
 
         $this->addColumn('action',
             array(
                 'header'    =>  Mage::helper('inpostparcels')->__('Action'),
-                'width'     => '10',
+                'width'     => '70px',
                 'type'      => 'action',
                 'getter'    => 'getId',
                 'actions'   => array(
@@ -177,6 +177,17 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Grid extends Mage_Admin
 				array(
 					'label' => Mage::helper('inpostparcels')->__('Create Multiple Returns Parcels'),
 					'url'   => $this->getUrl('*/*/massCreateMultipleReturnParcels')
+				)
+			);
+		}
+
+		// Allow the user to create Return Labels if it is enabled.
+		if($returns_allowed == true)
+		{
+			$this->getMassactionBlock()->addItem('returnlabels',
+				array(
+					'label' => Mage::helper('inpostparcels')->__('Return ' . $label),
+					'url'   => $this->getUrl('*/*/massCreateMultipleReturnParcelStickers')
 				)
 			);
 		}

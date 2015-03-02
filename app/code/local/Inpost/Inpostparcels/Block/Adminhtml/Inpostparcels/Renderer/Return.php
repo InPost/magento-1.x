@@ -12,11 +12,13 @@ class Inpost_Inpostparcels_Block_Adminhtml_Inpostparcels_Renderer_Return extends
 
 		if($value != '')
 		{
-			return "<span class='config-header'>&nbsp;</span>";
+			$url = Mage::getBaseUrl(Mage_Core_Model_Store::URL_TYPE_SKIN) . "install/default/default/images/success_msg_icon.gif";
+
+			return "<img src='" . $url . "' title='RR $value' alt='RR $value' />";
 		}
 		else
 		{
-			return "<span>&nbsp;</span>";
+			return "<span> </span>";
 		}
 	}
 

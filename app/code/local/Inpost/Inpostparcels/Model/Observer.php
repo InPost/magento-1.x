@@ -2,22 +2,17 @@
 
 class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 {
-	///
-	// saveShippingMethod
-	//
-	public function saveShippingMethod($evt)
-	{
-		if(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod() != 'inpostparcels_inpostparcels')
-		{
-			return;
-		}
+	public function saveShippingMethod($evt){
 
-		$request = $evt->getRequest();
+        if(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod() != 'inpostparcels_inpostparcels'){
+            return;
+        }
+
+        $request = $evt->getRequest();
 		$quote = $evt->getQuote();
-		$shippingAddress = $quote->getShippingAddress();
+        $shippingAddress = $quote->getShippingAddress();
 
-		$inpostparcels = $request->getParam('shipping_inpostparcels',
-			false);
+        $inpostparcels = $request->getParam('shipping_inpostparcels',false);
 		$quote_id = $quote->getId();
 		$data = array($quote_id => $inpostparcels);
 

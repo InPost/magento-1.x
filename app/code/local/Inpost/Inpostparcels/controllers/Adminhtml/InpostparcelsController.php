@@ -19,22 +19,22 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 	//
 	public function indexAction()
 	{
-		$this->_initAction()
-		->renderLayout();
+		$this->_initAction()->renderLayout();
 	}
 
 	///
 	// massStickersAction
 	//
-	public function massStickersAction()
+	public function massStickersAction($return_label = false)
 	{
 		$parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
-		$countSticker = 0;
+		$countSticker    = 0;
 		$countNonSticker = 0;
-		$pdf = null;
+		$pdf             = null;
 
-		$parcelsCode = array();
-		$parcelsToPay = array();
+		$parcelsCode       = array();
+		$parcelsReturnCode = array();
+		$parcelsToPay      = array();
 
 		foreach ($parcelsIds as $id)
 		{
@@ -50,7 +50,14 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 			if($parcelCollection->getParcelId() != '')
 			{
 				$parcelsCode[$id] = $parcelCollection->getParcelId();
-				if($parcelCollection->getStickerCreationDate() == '')
+				if($return_label == true)
+				{
+					$parcelsReturnCode[] = $parcelCollection->getReturnParcelId();
+				}
+
+				// Only pay for non-return parcels
+				if($parcelCollection->getStickerCreationDate() == '' &&
+				$return_label == false)
 				{
 					$parcelsToPay[$id] = $parcelCollection->getParcelId();
 				}
@@ -112,13 +119,27 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 				}
 			}
 
+			// Check if we are running Returns or normal parcel
+			// sticker creation and adjust URL accordingly.
+
+			if($return_label == true)
+			{
+				$url = Mage::getStoreConfig('carriers/inpostparcels/api_url') .
+					'reverselogistics/' .
+					$parcelsReturnCode[0] . 
+					'/label.json';
+			}
+			else
+			{
+				$url = Mage::getStoreConfig('carriers/inpostparcels/api_url').'stickers/'.implode(';', $parcelsCode);
+			}
 
 			$parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels(array(
-			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'stickers/'.implode(';', $parcelsCode),
+			'url'        => $url,
 			'methodType' => 'GET',
-			'params' => array(
+			'params'     => array(
 				'format' => $format,
-				'type' => $type
+				'type'   => $type
 			)
 			));
 		}
@@ -147,7 +168,15 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 				}
 				$countSticker++;
 			}
-			$pdf = base64_decode(@$parcelApi['result']);
+
+			if($return_label == true)
+			{
+				$pdf = base64_decode(@$parcelApi['result']->data);
+			}
+			else
+			{
+				$pdf = base64_decode(@$parcelApi['result']);
+			}
 		}
 
 		if ($countNonSticker)
@@ -183,8 +212,9 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 				$output_type = 'application/text';
 			}
 
-			return $this->_prepareDownloadResponse($name, $pdf,
-				$output_type);
+			return $this->_prepareDownloadResponse($name,
+					$pdf,
+					$output_type);
 		}
 		else
 		{
@@ -243,17 +273,22 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
             }
         }
 
-        if ($countNonRefreshStatus) {
-            if ($countNonRefreshStatus) {
-                $this->_getSession()->addError($this->__('%s parcel status cannot be refresh', $countNonRefreshStatus));
-            } else {
-                $this->_getSession()->addError($this->__('The parcel status cannot be refresh'));
-            }
-        }
-        if ($countRefreshStatus) {
-            $this->_getSession()->addSuccess($this->__('%s parcel status have been refresh.', $countRefreshStatus));
-        }
-        $this->_redirect('*/*/');
+		if ($countNonRefreshStatus)
+		{
+			if ($countNonRefreshStatus)
+			{
+				$this->_getSession()->addError($this->__('%s parcel status cannot be refresh', $countNonRefreshStatus));
+			}
+			else
+			{
+				$this->_getSession()->addError($this->__('The parcel status cannot be refresh'));
+			}
+		}
+		if ($countRefreshStatus)
+		{
+			$this->_getSession()->addSuccess($this->__('%s parcel status have been refresh.', $countRefreshStatus));
+		}
+		$this->_redirect('*/*/');
 	}
 
 	///
@@ -333,6 +368,8 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 	//    
 	public function massCreateMultipleParcelsAction()
 	{
+		Mage::log("start massCreateMultipleParcelsAction method");
+
 		$parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
 		$countParcel = 0;
 		$countNonParcel = 0;
@@ -666,8 +703,8 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 			'parcel_tmp_id'            => @$parcelDetailDb->tmp_id,
 			'parcel_target_machine_id' => @$parcelDetailDb->target_machine,
 			// Return Parcel Details
-			'return_parcel_id'     => @$parcelDetailDb->return_parcel_id,
-			'return_parcel_expiry' => @$parcelDetailDb->return_parcel_expiry,
+			'return_parcel_id'     => $parcel->getReturnParcelId(),
+			'return_parcel_expiry' => $parcel->getReturnParcelExpiry(),
 			);
 			Mage::register('inpostparcelsData', $inpostparcelsData);
 			Mage::register('api_source', $parcel->getApiSource());
@@ -689,6 +726,8 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 	//
 	public function saveAction()
 	{
+		Mage::log("start saveAction method");
+
 		if ( $this->getRequest()->getPost() )
 		{
 			try {
@@ -702,7 +741,7 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 				if($parcel->getParcelId() != '')
 				{
 					// update Inpost parcel
-                    $params = array(
+					$params = array(
                         'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels',
                         'methodType' => 'PUT',
                         'params' => array(
@@ -711,132 +750,163 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
                             'size' => !isset($postData['parcel_size']) || $postData['parcel_size'] == @$parcelDetailDb->size?null:$postData['parcel_size'],
                             'status' => !isset($postData['parcel_status']) || $postData['parcel_status'] == $parcel->getParcelStatus()?null:$postData['parcel_status'],
                             //'target_machine' => !isset($postData['parcel_target_machine_id']) || $postData['parcel_target_machine_id'] == $parcel->getParcelTargetMachineId()?null:$postData['parcel_target_machine_id']
-                        )
-                    );
+					)
+					);
 				}
 				else
 				{
 					// create Inpost parcel e.g.
-                    $params = array(
-                        'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels',
-                        'methodType' => 'POST',
-                        'params' => array(
-                            'description' => @$postData['parcel_description'],
-                            'description2' => 'magento-1.x-'.Mage::helper('inpostparcels/data')->getVersion(),
-                            'receiver' => array(
-                                'phone' => @$postData['parcel_receiver_phone'],
-                                'email' => @$postData['parcel_receiver_email']
-                            ),
-                            'size' => @$postData['parcel_size'],
-                            'tmp_id' => @$postData['parcel_tmp_id'],
-                            'target_machine' => @$postData['parcel_target_machine_id']
-                        )
-                    );
+					$params = array(
+						'url'        => Mage::getStoreConfig('carriers/inpostparcels/api_url').'parcels',
+						'methodType' => 'POST',
+						'params'     => array(
+							'description'    => @$postData['parcel_description'],
+							'description2'   => 'magento-1.x-'.Mage::helper('inpostparcels/data')->getVersion(),
+							'receiver'       => array(
+								'phone' => @$postData['parcel_receiver_phone'],
+								'email' => @$postData['parcel_receiver_email']
+							),
+							'size'           => @$postData['parcel_size'],
+							'tmp_id'         => @$postData['parcel_tmp_id'],
+							'target_machine' => @$postData['parcel_target_machine_id']
+							)
+						);
 
-                    switch($parcel->getApiSource()){
-                        case 'PL':
-                            $insurance_amount = Mage::getSingleton('adminhtml/session')->getParcelInsuranceAmount();
-                            $params['params']['cod_amount'] = @$postData['parcel_cod_amount'];
-                            if(@$postData['parcel_insurance_amount'] != ''){
-                                $params['params']['insurance_amount'] = @$postData['parcel_insurance_amount'];
-                            }
-                            $params['params']['source_machine'] = @$postData['parcel_source_machine_id'];
-                            break;
-                    }
-                }
+					switch($parcel->getApiSource())
+					{
+						case 'PL':
+							$insurance_amount = Mage::getSingleton('adminhtml/session')->getParcelInsuranceAmount();
+							$params['params']['cod_amount'] = @$postData['parcel_cod_amount'];
+							if(@$postData['parcel_insurance_amount'] != '')
+							{
+								$params['params']['insurance_amount'] = @$postData['parcel_insurance_amount'];
+							}
+							$params['params']['source_machine'] = @$postData['parcel_source_machine_id'];
+							break;
+					}
+				}
 
-                $parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels($params);
+				$parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels($params);
 
-                if(@$parcelApi['info']['http_code'] != '204' && @$parcelApi['info']['http_code'] != '201'){
-                    if(!empty($parcelApi['result'])){
-                        foreach(@$parcelApi['result'] as $key => $error){
-                            if(is_array($error)){
-                                foreach($error as $subKey => $subError){
-                                    $this->_getSession()->addError($this->__('Parcel %s '.$subError, $key.' '.$postData['parcel_id']));
-                                }
-                            }else{
-                                $this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
-                            }
-                        }
-                    }
-                    $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
-                    return;
-                }else{
-                    if($parcel->getParcelId() != ''){
-                        $parcelDetail = $parcelDetailDb;
-                        $parcelDetail->description = $postData['parcel_description'];
-                        $parcelDetail->size = $postData['parcel_size'];
-                        $parcelDetail->status = $postData['parcel_status'];
+				if(@$parcelApi['info']['http_code'] != '204' &&
+				   @$parcelApi['info']['http_code'] != '201')
+				{
+					if(!empty($parcelApi['result']))
+					{
+						foreach(@$parcelApi['result'] as $key => $error)
+						{
+							if(is_array($error))
+							{
+								foreach($error as $subKey => $subError)
+								{
+									$this->_getSession()->addError(
+										$this->__('Parcel %s ' .
+											$subError, $key . ' ' . $postData['parcel_id']));
+								}
+							}
+							else
+							{
+								$this->_getSession()->addError($this->__('Parcel %s '.$error, $key));
+							}
+						}
+					}
+					$this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+					return;
+				}
+				else
+				{
+					// We have created or updated a parcels details.
+					if($parcel->getParcelId() != '')
+					{
+						// We updated a parcel.
+						$parcelDetail = $parcelDetailDb;
+						$parcelDetail->description = $postData['parcel_description'];
+						$parcelDetail->size = $postData['parcel_size'];
+						$parcelDetail->status = $postData['parcel_status'];
 
-                        $fields = array(
-                            'parcel_status' => isset($postData['parcel_status'])?$postData['parcel_status']:$parcel->getParcelStatus(),
-                            'parcel_detail' => json_encode($parcelDetail),
-                            'variables' => json_encode(array())
-                        );
+						$fields = array(
+							'parcel_status' => isset($postData['parcel_status'])?$postData['parcel_status']:$parcel->getParcelStatus(),
+							'parcel_detail' => json_encode($parcelDetail),
+							'variables' => json_encode(array())
+						);
 
-                        $parcel->setParcelStatus($fields['parcel_status']);
-                        $parcel->setParcelDetail($fields['parcel_detail']);
-                        $parcel->setVariables($fields['variables']);
-                        $parcel->save();
+						$parcel->setParcelStatus($fields['parcel_status']);
+						$parcel->setParcelDetail($fields['parcel_detail']);
+						$parcel->setVariables($fields['variables']);
+						$parcel->save();
+					}
+					else
+					{
+						// We created a new parcel.
+						$fields = array(
+							'parcel_id' => $parcelApi['result']->id,
+							'parcel_status' => 'Created',
+							'parcel_detail' => json_encode($params['params']),
+							'parcel_target_machine_id' => isset($postData['parcel_target_machine_id'])?$postData['parcel_target_machine_id']:$parcel->getParcelTargetMachineId(),
+							'parcel_target_machine_detail' => $parcel->getParcelTargetMachineDetail(),
+							'variables' => json_encode(array())
+						);
 
-                    }else{
-//                        $parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels(
-//                            array(
-//                                'url' => $parcelApi['info']['redirect_url'],
-//                                'ds' => '&',
-//                                'methodType' => 'GET',
-//                                'params' => array(
-//                                )
-//                            )
-//                        );
+						if($parcel->getParcelTargetMachineId() != $postData['parcel_target_machine_id'])
+						{
+							$parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels(
+							array(
+							'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines/'.$postData['parcel_target_machine_id'],
+							'methodType' => 'GET',
+							'params' => array()
+							)
+							);
 
-                        $fields = array(
-                            'parcel_id' => $parcelApi['result']->id,
-                            'parcel_status' => 'Created',
-                            'parcel_detail' => json_encode($params['params']),
-                            'parcel_target_machine_id' => isset($postData['parcel_target_machine_id'])?$postData['parcel_target_machine_id']:$parcel->getParcelTargetMachineId(),
-                            'parcel_target_machine_detail' => $parcel->getParcelTargetMachineDetail(),
-                            'variables' => json_encode(array())
-                        );
+							$fields['parcel_target_machine_detail'] = json_encode($parcelApi['result']);
+						}
 
-                        if($parcel->getParcelTargetMachineId() != $postData['parcel_target_machine_id']){
-                            $parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels(
-                                array(
-                                    'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines/'.$postData['parcel_target_machine_id'],
-                                    'methodType' => 'GET',
-                                    'params' => array(
-                                    )
-                                )
-                            );
+						$rrcode = "";
+						$expiry = "0000-00-00 00:00:00";
+						// Check to see if we should
+						// allow the creation of Return
+						// parcel labels.
+						$returns_allowed = Mage::getStoreConfig('carriers/inpostparcels/allow_return_parcels');
+						$default_returns = Mage::getStoreConfig('carriers/inpostparcels/default_return_parcels');
 
-                            $fields['parcel_target_machine_detail'] = json_encode($parcelApi['result']);
-                        }
+						if($returns_allowed == true &&
+						   $default_returns == true)
+						{
+							$this->_create_new_return_parcel(
+								@$postData['parcel_receiver_phone'],
+								@$postData['parcel_receiver_email'],
+								@$postData['parcel_size'],
+								$rrcode, $expiry);
+						}
 
-                        $parcel->setParcelId($fields['parcel_id']);
-                        $parcel->setParcelStatus($fields['parcel_status']);
-                        $parcel->setParcelDetail($fields['parcel_detail']);
-                        $parcel->setParcelTargetMachineId($fields['parcel_target_machine_id']);
-                        $parcel->setParcelTargetMachineDetail($fields['parcel_target_machine_detail']);
-                        $parcel->setVariables($fields['variables']);
-                        $parcel->save();
-                    }
-                }
-                Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('Item was successfully saved'));
-                Mage::getSingleton('adminhtml/session')->setInpostparcelsData(false);
-                Mage::getSingleton('adminhtml/session')->setParcelTargetMachinesDetail(false);
-                Mage::getSingleton('adminhtml/session')->setParcelTargetMachinesDetail(false);
-                Mage::getSingleton('adminhtml/session')->setParcelInsuranceAmount(false);
-                $this->_redirect('*/*/');
-                return;
-            } catch (Exception $e) {
-                Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
-                Mage::getSingleton('adminhtml/session')->setInpostparcelsData($this->getRequest()->getPost());
-                $this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
-                return;
-            }
-        }
-        $this->_redirect('*/*/');
-    }
+						$parcel->setParcelId($fields['parcel_id']);
+						$parcel->setParcelStatus($fields['parcel_status']);
+						$parcel->setParcelDetail($fields['parcel_detail']);
+						$parcel->setParcelTargetMachineId($fields['parcel_target_machine_id']);
+						$parcel->setParcelTargetMachineDetail($fields['parcel_target_machine_detail']);
+						$parcel->setVariables($fields['variables']);
+						$parcel->setReturnParcelId($rrcode);
+						$parcel->setReturnParcelExpiry($expiry);
+						$parcel->save();
+					}
+				}
+				Mage::getSingleton('adminhtml/session')->addSuccess(Mage::helper('adminhtml')->__('Item was successfully saved'));
+				Mage::getSingleton('adminhtml/session')->setInpostparcelsData(false);
+				Mage::getSingleton('adminhtml/session')->setParcelTargetMachinesDetail(false);
+				Mage::getSingleton('adminhtml/session')->setParcelTargetMachinesDetail(false);
+				Mage::getSingleton('adminhtml/session')->setParcelInsuranceAmount(false);
+				$this->_redirect('*/*/');
+				return;
+			}
+			catch (Exception $e)
+			{
+				Mage::getSingleton('adminhtml/session')->addError($e->getMessage());
+				Mage::getSingleton('adminhtml/session')->setInpostparcelsData($this->getRequest()->getPost());
+				$this->_redirect('*/*/edit', array('id' => $this->getRequest()->getParam('id')));
+				return;
+			}
+		}
+		$this->_redirect('*/*/');
+	}
 
 	///
 	// gridAction
@@ -860,7 +930,7 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 	{
 		// Check to see if the required data is available to allow us
 		// to create a returns parcel or not.
-		$days_to_add  = Mage::getStoreConfig('carriers/inpostparcels/expiry_return_parcels');
+		$days_to_add = (int)Mage::getStoreConfig('carriers/inpostparcels/expiry_return_parcels');
 
 		$fail = false;
 
@@ -889,12 +959,8 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 
 		$parcels = array();
 
-		Mage::log("About to go through the parcels.");
-
 		foreach ($parcelsIds as $id)
 		{
-			Mage::log("Going through the parcels.");
-
 			$parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
 			$orderCollection = Mage::getResourceModel('sales/order_grid_collection')
 			->addFieldToFilter('entity_id', $parcelCollection->getOrderId())
@@ -908,19 +974,15 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 			}
 			$parcelDetailDb = json_decode($parcelCollection->getParcelDetail());
 
-			$expiry_date  = date("Y-m-d", time() + $days_to_add);
-
-			Mage::log("The parcel details information =");
-			Mage::log($parcelDetailDb);
+			// Must add days, not seconds to the current day.
+			$expiry_date  = date("Y-m-d", time() +
+				($days_to_add * 60 * 60 * 24));
 
 			// The mobile number saved is only the last 9 digits,
 			// we need 10 for the returns process. Add a 7 to the
 			// start of the number.
 			$sender_phone = "7" . $parcelDetailDb->receiver->phone;
 			$sender_email = $parcelDetailDb->receiver->email;
-
-			Mage::log("Sender phone =" . $sender_phone . ".");
-			Mage::log("Sender email =" . $sender_email . ".");
 
 			// create Inpost Return parcel
 			$params = array(
@@ -938,11 +1000,11 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 			// Do the REST call.
 			$parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels($params);
 
-			Mage::log("Result from the API call is.");
-			Mage::log($parcelApi);
+			//Mage::log("Result from the API call is.");
+			//Mage::log($parcelApi);
 
 			if(@$parcelApi['info']['http_code'] != '204' &&
-				@$parcelApi['info']['http_code'] != '201')
+				@$parcelApi['info']['http_code'] != '200')
 			{
 				if(!empty($parcelApi['result']))
 				{
@@ -1001,6 +1063,150 @@ class Inpost_Inpostparcels_Adminhtml_InpostparcelsController extends Mage_Adminh
 		}
 
 		$this->_redirect('*/*/');
+	}
+
+	///
+	// massCreateMultipleReturnParcelStickersAction
+	//  
+	// We will go through the list of parcels selected by the user.
+	// We will process only the ones that have Parcel Id's against them.
+	//
+	// NB Only ONE return label can be created at a time. We will check
+	// to see if the user has selected more than one and generate an
+	// error if they have.
+	//
+	public function massCreateMultipleReturnParcelStickersAction()
+	{
+		// All of the functionality for this is in the normal parcel
+		// sticker creation. There is only one slight change needed
+		// to use a different URL for the sticker creation call.
+		$parcelsIds = $this->getRequest()->getPost('parcels_ids', array());
+
+		$ret = NULL;
+
+		if(count($parcelsIds) != 1)
+		{
+			$this->_getSession()->addError(
+				$this->__('Please select only ONE parcel to create Return Label for.'));
+		}
+		elseif(strlen($parcelsIds[0]) == 0)
+		{
+			$this->_getSession()->addError(
+				$this->__('Please create parcel first.'));
+		}
+		else
+		{
+			// Check to see if the expiry date is already passed.
+			// Stops them making unwanted API calls.
+			foreach($parcelsIds as $id)
+			{
+				$parcelCollection = Mage::getModel('inpostparcels/inpostparcels')->load($id);
+				$expiry_date = $parcelCollection->getReturnParcelExpiry();
+			}
+
+			$hour = substr($expiry_date, 11, 2);
+			$mins = substr($expiry_date, 14, 2);
+			$secs = substr($expiry_date, 17, 2);
+			$mont = substr($expiry_date, 5, 2);
+			$days = substr($expiry_date, 8, 2);
+			$year = substr($expiry_date, 0, 4);
+
+			if(mktime($hour, $mins, $secs, $mont, $days, $year) < time())
+			{
+				$this->_getSession()->addError(
+					$this->__('The parcel has expired and cannot have a label printed.'));
+			}
+			else
+			{
+				$ret = $this->massStickersAction(true);
+			}
+		}
+
+		if($ret == NULL)
+		{
+			$this->_redirect('*/*/');
+			return;
+		}
+		else
+		{
+			return $ret;
+		}
+	}
+
+	///
+	// _create_new_return_parcel
+	//
+	// @param Phone number of the sender without the extra 7
+	// @param Email address of the sender
+	// @param Size of the parcel
+	// @param The RR code of the return parcel
+	// @param The expiry date of the return parcel
+	//
+	// @return True if the parcel creation worked, otherwise false
+	//
+	private function _create_new_return_parcel($phone, $email, $size,
+							&$rrcode, &$expiry)
+	{
+		$ret = false;
+
+		$days_to_add = (int)Mage::getStoreConfig('carriers/inpostparcels/expiry_return_parcels');
+
+		// Must add days, not seconds to the current day.
+		$expiry_date  = date("Y-m-d", time() +
+				($days_to_add * 60 * 60 * 24));
+
+		// create Inpost Return parcel
+		$params = array(
+			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url') .
+				'reverselogistics.json',
+			'methodType'   => 'POST',
+			'params'       => array(
+				'parcel_size'  => $size,
+				'expire_at'    => $expiry_date,
+				'sender_phone' => "7" . $phone,
+				'sender_email' => $email,
+				'with_label'   => 'TRUE',
+				)
+		);
+
+		// Do the REST call.
+		$parcelApi = Mage::helper('inpostparcels/data')->connectInpostparcels($params);
+
+		if(@$parcelApi['info']['http_code'] != '200')
+		{
+			if(!empty($parcelApi['result']))
+			{
+				foreach(@$parcelApi['result'] as $key => $error)
+				{
+					if(is_array($error))
+					{
+						foreach($error as $subKey => $subError)
+						{
+							$this->_getSession()->addError($this->__('Parcel %s '.
+								$subError,
+								$key .
+								' ' .
+								$id));
+						}
+					}
+					else
+					{
+						$this->_getSession()->addError($this->__('Parcel %s '.
+							$error,
+							$key));
+					}
+				}
+			}
+		}
+		else
+		{
+			$rrcode = $parcelApi['result']->code;
+			$expiry = $parcelApi['result']->expire_at;
+
+			$ret = true;
+		}
+
+		return($ret);
 	}
 
 }
