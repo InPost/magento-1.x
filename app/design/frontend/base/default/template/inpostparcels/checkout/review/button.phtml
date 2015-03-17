@@ -1,0 +1,62 @@
+<?php
+/**
+ * This file is part of the official Amazon Payments Advanced extension
+ * for Magento (c) creativestyle GmbH <amazon@creativestyle.de>
+ * All rights reserved
+ *
+ * Reuse or modification of this source code is not allowed
+ * without written permission from creativestyle GmbH
+ *
+ * @category   Creativestyle
+ * @package    Creativestyle_AmazonPayments
+ * @copyright  Copyright (c) 2014 creativestyle GmbH
+ * @author     Marek Zabrowarny / creativestyle GmbH <amazon@creativestyle.de>
+ */
+?>
+<?php
+// Get details of the current order and make sure that the fields have been
+// filled.
+	$shipping_method = Mage::getSingleton('amazonpayments/checkout')
+		->getQuote()
+		->getShippingAddress()
+		->getShippingMethod();
+	Mage::log("Shipping method.");
+	Mage::log($shipping_method);
+
+	$request = $this->getRequest()->getParam('shipping_inpostparcels', false);
+	Mage::log("Request data.");
+	Mage::log($request);
+
+	if(strcasecmp($shipping_method, "inpostparcels_inpostparcels") == 0 &&
+		((isset($request['parcel_target_machine_id']) &&
+		strlen($request['parcel_target_machine_id']) == 0) ||
+		(isset($request['receiver_phone']) &&
+		strlen($request['receiver_phone']) < 9)))
+	{
+		// The user has not filled in the fields.
+		echo "<button type='submit' title='";
+		echo $this->helper('checkout')->__('Place Order') . "'";
+		echo " class='button btn-checkout' disabled='disabled'";
+		echo " onclick='alert(\"You must pick a locker and provide a mobile phone number.\");'><span>";
+		echo "<span>";
+		echo $this->helper('checkout')->__('Place Order');
+		echo "</span></span></button>";
+	}
+	else
+	{
+		echo "<button type='submit' title='";
+		echo $this->helper('checkout')->__('Place Order') . "'";
+		echo " class='button btn-checkout' disabled='disabled'";
+		echo " onclick='APA.saveOrder();'><span>";
+		echo "<span>";
+		echo $this->helper('checkout')->__('Place Order');
+		echo "</span></span></button>";
+	}
+?>
+<!--
+<button type="submit" title="<?php
+//echo $this->helper('checkout')->__('Place Order');
+?>" class="button btn-checkout" disabled="disabled" onclick="APA.saveOrder();"><span><span><?php
+//echo $this->helper('checkout')->__('Place Order');
+?></span></span></button>
+-->
