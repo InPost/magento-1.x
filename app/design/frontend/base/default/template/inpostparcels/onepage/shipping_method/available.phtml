@@ -1,0 +1,375 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2014 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+?>
+<!-- Inpost.sn -->
+<?php
+	$machine_params = array();
+	switch(Mage::helper('inpostparcels/data')->getCurrentApi())
+	{
+		case 'PL':
+			$machine_params['payment_available'] = true;
+			break;
+		case 'UK':
+			$machine_params['status'] = "Operating";
+			break;
+		default:
+			break;
+	}
+
+	$allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
+		array(
+			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
+			'methodType' => 'GET',
+			'params' => $machine_params
+		)
+	);
+	
+	$addr = Mage::getSingleton('amazonpayments/checkout')->getQuote()->getShippingAddress();
+
+	$city = '';
+
+	if($addr != null)
+	{
+		$city = $addr->getCity();
+	}
+
+	$parcelTargetAllMachinesId     = array();
+	$parcelTargetAllMachinesDetail = array();
+	$parcelTargetMachinesId        = array();
+
+	if(is_array(@$allMachines['result']) && !empty($allMachines['result']))
+	{
+		foreach($allMachines['result'] as $key => $machine)
+		{
+			$parcelTargetAllMachinesId[$machine->id] = $machine->id .
+				', ' . @$machine->address->city . ', ' .
+				@$machine->address->street;
+
+			$parcelTargetAllMachinesDetail[$machine->id] = array(
+				'id' => $machine->id,
+				'address' => array(
+				'building_number' => @$machine->address->building_number,
+				'flat_number' => @$machine->address->flat_number,
+				'post_code' => @$machine->address->post_code,
+				'province' => @$machine->address->province,
+				'street' => @$machine->address->street,
+				'city' => @$machine->address->city
+				)
+			);
+
+			// Now check to see if it is a local machine to the
+			// shipping city.
+			if(@$machine->address->city == $city)
+			{
+				$parcelTargetMachinesId[$machine->id] = $machine->id .
+					', ' . @$machine->address->city . ', ' .
+					@$machine->address->street;
+
+			}
+		}
+	}
+?>
+
+<script type="text/javascript" src="<?php echo Mage::helper('inpostparcels/data')->getGeowidgetUrl(); ?>"></script>
+<script type="text/javascript">
+//<![CDATA[
+	var $j = jQuery.noConflict();
+
+function user_function(value)
+{
+        var address = value.split(';');
+        //document.getElementById('town').value=address[1];
+        //document.getElementById('street').value=address[2]+address[3];
+        var box_machine_name = document.getElementById('name').value;
+        var box_machine_town = document.value=address[1];
+        var box_machine_street = document.value=address[2];
+
+        var is_value = 0;
+        document.getElementById('shipping_inpostparcels').value = box_machine_name;
+        var shipping_inpostparcels = document.getElementById('shipping_inpostparcels');
+
+	for(i=0;i<shipping_inpostparcels.length;i++)
+	{
+		if(shipping_inpostparcels.options[i].value == document.getElementById('name').value)
+		{
+			shipping_inpostparcels.selectedIndex = i;
+			is_value = 1;
+		}
+	}
+
+	if (is_value == 0)
+	{
+            shipping_inpostparcels.options[shipping_inpostparcels.options.length] = new Option(box_machine_name+','+box_machine_town+','+box_machine_street, box_machine_name);
+            shipping_inpostparcels.selectedIndex = shipping_inpostparcels.length-1;
+	}
+}
+//]]>
+</script>
+<!-- Inpst.en -->
+
+<?php /** @var $this Mage_Checkout_Block_Onepage_Shipping_Method_Available */ ?>
+<?php $_shippingRateGroups = $this->getShippingRates(); ?>
+<?php if (!$_shippingRateGroups): ?>
+    <p><?php echo $this->__('Sorry, no quotes are available for this order at this time.') ?></p>
+<?php else: ?>
+    <dl class="sp-methods">
+    <?php $shippingCodePrice = array(); ?>
+    <?php $_sole = count($_shippingRateGroups) == 1; foreach ($_shippingRateGroups as $code => $_rates): ?>
+        <dt><?php echo $this->escapeHtml($this->getCarrierName($code)) ?></dt>
+        <dd>
+            <ul>
+            <?php $_sole = $_sole && count($_rates) == 1; foreach ($_rates as $_rate): ?>
+                <?php $shippingCodePrice[] = "'".$_rate->getCode()."':".(float)$_rate->getPrice(); ?>
+                <li>
+                   <?php if ($_rate->getErrorMessage()): ?>
+                    <ul class="messages"><li class="error-msg"><ul><li><?php echo $this->escapeHtml($_rate->getErrorMessage()) ?></li></ul></li></ul>
+                   <?php else: ?>
+                        <?php if ($_sole) : ?>
+                        <span class="no-display"><input name="shipping_method" type="radio" value="<?php echo $_rate->getCode() ?>" id="s_method_<?php echo $_rate->getCode() ?>" checked="checked" /></span>
+                        <?php else: ?>
+                        <input name="shipping_method" type="radio" value="<?php echo $_rate->getCode() ?>" id="s_method_<?php echo $_rate->getCode() ?>"<?php if($_rate->getCode()===$this->getAddressShippingMethod()) echo ' checked="checked"' ?> class="radio"/>
+
+                        <?php if ($_rate->getCode() === $this->getAddressShippingMethod()): ?>
+                        <script type="text/javascript">
+                            //<![CDATA[
+                                lastPrice = <?php echo (float)$_rate->getPrice(); ?>;
+                            //]]>
+                        </script>
+                        <?php endif; ?>
+
+                        <?php endif; ?>
+                        <label for="s_method_<?php echo $_rate->getCode() ?>"><?php echo $this->escapeHtml($_rate->getMethodTitle()) ?>
+                        <?php $_excl = $this->getShippingPrice($_rate->getPrice(), $this->helper('tax')->displayShippingPriceIncludingTax()); ?>
+                        <?php $_incl = $this->getShippingPrice($_rate->getPrice(), true); ?>
+                        <?php echo $_excl; ?>
+                        <?php if ($this->helper('tax')->displayShippingBothPrices() && $_incl != $_excl): ?>
+                            (<?php echo $this->__('Incl. Tax'); ?> <?php echo $_incl; ?>)
+                        <?php endif; ?>
+                        </label>
+                   <?php endif ?>
+                </li>
+            <?php endforeach; ?>
+            </ul>
+        </dd>
+    <?php endforeach; ?>
+<!-- Inpost.sn -->
+	<dd id="inpost_locker_div" style="display:none;">
+		<ul class="input-box">
+		<!-- Hidden fields -->
+		<input type="hidden" name="form_key" value="<?php echo Mage::getSingleton('core/session')->getFormKey(); ?>" />
+		<input type="hidden" id="name" name="name" disabled="disabled" />
+		<input type="hidden" id="box_machine_town" name="box_machine_town" disabled="disabled" />
+		<input type="hidden" id="address" name="address" disabled="disabled" />
+
+		<!-- User InPost Fields -->
+		<li>
+		<select class="validate required-entry" id="shipping_inpostparcels" name="shipping_inpostparcels[parcel_target_machine_id]">
+			<option value=''><?php echo $this->__('Please Select a Locker'); ?></option>
+                <?php foreach($parcelTargetMachinesId as $key => $parcelTargetMachineId): ?>
+			<option value='<?php echo $key ?>'><?php echo $parcelTargetMachineId; ?></option>
+                <?php endforeach; ?>
+
+		</select>
+		</li>
+		<li>
+        	<a href="#" onClick="openMap(); return false;"><?php echo $this->__('Map')?></a>
+
+	&nbsp; | &nbsp; <input type="checkbox" name="show_all_machines"><?php echo $this->__('Show terminals in other cities') ?> 
+        	</li>
+		<li>
+		<span class="required">Mobile</span>
+		<input type="text" name="shipping_inpostparcels[receiver_phone]" id="inpostparcels_phone" class="validate-number minimum-length-11 maximum-length-11 inpostparcels_phone" value="" maxlength="11" style="width:150px !important;" placeholder="07712345678" title="Mobile Phone Number" />
+		</li>
+		</ul>
+<script type="text/javascript">
+$j(document).ready(function(){
+
+    $j('input[type="checkbox"][name="show_all_machines"]').click(function(){
+        var machines_list_type = $j(this).is(':checked');
+
+	if(machines_list_type == true)
+	{
+            var machines = {
+                '' : '<?php echo $this->__('Select Machine..') ?>',
+            <?php foreach($parcelTargetAllMachinesId as $key => $parcelTargetAllMachineId): ?>
+                '<?php echo $key ?>' : '<?php echo addslashes($parcelTargetAllMachineId) ?>',
+            <?php endforeach; ?>
+		};
+	}
+	else
+	{
+            var machines = {
+                '' : '<?php echo $this->__('Select Machine..') ?>',
+            <?php foreach($parcelTargetMachinesId as $key => $parcelTargetMachineId): ?>
+                '<?php echo $key ?>' : '<?php echo addslashes($parcelTargetMachineId) ?>',
+            <?php endforeach; ?>			
+                        };
+        }
+
+        $j('#shipping_inpostparcels option').remove();
+        $j.each(machines, function(val, text) {
+            $j('#shipping_inpostparcels').append(
+                    $j('<option></option>').val(val).html(text)
+            );
+        });
+    });
+
+    $j('input[type="radio"][name="shipping_method"]').click(function(){
+        if($j("#s_method_inpostparcels_inpostparcels").is(":checked")){
+            $j("#shipping_form_inpostparcels_inpostparcels").css("display");
+        }else{
+            $j("#shipping_form_inpostparcels_inpostparcels").css("display","none");
+        }
+    });
+	$j('#shipping_inpostparcels').change(function(){
+		// Check and set the hidden fields for the machine's data
+		// hidden_machine_list
+		$j('[name=hidden_machine_list]').val(
+			$j('#shipping_inpostparcels').val() );
+
+		$j('#address').val($j("#hidden_machine_list option:selected" ).text() );
+	});
+});
+
+</script>
+	</dd>
+<!-- Inpost.en -->
+    </dl>
+<script type="text/javascript">
+//<![CDATA[
+    <?php if (!empty($shippingCodePrice)): ?>
+        var shippingCodePrice = {<?php echo implode(',',$shippingCodePrice); ?>};
+    <?php endif; ?>
+
+    $$('input[type="radio"][name="shipping_method"]').each(function(el){
+        Event.observe(el, 'click', function(){
+            if (el.checked == true) {
+                var getShippingCode = el.getValue();
+                <?php if (!empty($shippingCodePrice)): ?>
+                    var newPrice = shippingCodePrice[getShippingCode];
+                    if (!lastPrice) {
+                        lastPrice = newPrice;
+                        quoteBaseGrandTotal += newPrice;
+                    }
+                    if (newPrice != lastPrice) {
+                        quoteBaseGrandTotal += (newPrice-lastPrice);
+                        lastPrice = newPrice;
+                    }
+                <?php endif; ?>
+                checkQuoteBaseGrandTotal = quoteBaseGrandTotal;
+                return false;
+            }
+       });
+    });
+// Inpost.sn
+
+///
+// check_fields
+//
+// check to see if the Shipping method is InPost and if the user has left the
+// mobile or locker machine ID empty.
+//
+function check_fields()
+{
+	if($j('#shipping_method').val() == 'inpostparcels_inpostparcels')
+	{
+		if($j('#shipping_inpostparcels').val() == '')
+		{
+			alert('Please fill in the Locker ID.');
+			return false;
+		}
+		if($j('#inpostparcels_phone').val() == '')
+		{
+			alert('Please fill in the mobile number.');
+			return false;
+		}
+	}
+	// Save the Machine ID into our hidden field that is on the correct
+	// form.
+	$j('#inpost_hidden_machine').val($j('#shipping_inpostparcels').val());
+	$j('#inpost_hidden_mobile').val($j('#inpostparcels_phone').val());
+	// The address field contains the ';' seperate fields.
+	// e.g. Airdrie;Glen Road;1;false
+	$j('#inpost_hidden_details').val(
+		$j('#address').val()
+	);
+
+	// We are good to submit
+	$j( "#review_button" ).submit();
+	return true;
+}
+
+///
+// showShipping
+//
+function showShipping()
+{
+	//alert('in showShipping');
+	$j('#inpost_locker_div').show();
+}
+
+///
+// hideShipping
+//
+function hideShippingAll()
+{
+	//alert('in hideShippingAll');
+	$j('#inpost_locker_div').hide();
+}
+
+///
+// document.ready
+//
+// @brief Display InPost fields as required.
+//
+$j(document).ready(function() {
+//alert('in here.' +$j('input:radio[name=shipping_method]:checked').val());
+
+	if($j('input:radio[name=shipping_method]:checked').val() == 'inpostparcels_inpostparcels')
+	{
+		showShipping();
+	}
+	else
+	{
+		hideShippingAll();
+	}
+
+	$j('input:radio[name=shipping_method]').change(function() {
+
+		if($j('input:radio[name=shipping_method]:checked').val() == 'inpostparcels_inpostparcels')
+		{
+			showShipping();
+		}
+		else
+		{
+			hideShippingAll();
+		}
+	});
+});
+
+//]]>
+</script>
+<?php endif; ?>

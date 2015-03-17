@@ -1,0 +1,253 @@
+<?php
+/**
+ * Magento
+ *
+ * NOTICE OF LICENSE
+ *
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE_AFL.txt.
+ * It is also available through the world-wide-web at this URL:
+ * http://opensource.org/licenses/afl-3.0.php
+ * If you did not receive a copy of the license and are unable to
+ * obtain it through the world-wide-web, please send an email
+ * to license@magentocommerce.com so we can send you a copy immediately.
+ *
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade Magento to newer
+ * versions in the future. If you wish to customize Magento for your
+ * needs please refer to http://www.magentocommerce.com for more information.
+ *
+ * @category    design
+ * @package     base_default
+ * @copyright   Copyright (c) 2014 Magento Inc. (http://www.magentocommerce.com)
+ * @license     http://opensource.org/licenses/afl-3.0.php  Academic Free License (AFL 3.0)
+ */
+/** @var $this Mage_Paypal_Block_Express_Review */
+?>
+<!-- Inpost.sn -->
+<?php
+	$machine_params = array();
+	switch(Mage::helper('inpostparcels/data')->getCurrentApi())
+	{
+		case 'PL':
+			$machine_params['payment_available'] = true;
+			break;
+		case 'UK':
+			$machine_params['status'] = "Operating";
+			break;
+		default:
+			break;
+	}
+
+	$allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
+		array(
+			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
+			'methodType' => 'GET',
+			'params' => $machine_params
+		)
+	);
+	
+	$addr = $this->getShippingAddress();
+	$city = '';
+
+	if($addr != null)
+	{
+		$city = $addr->getCity();
+	}
+
+	$parcelTargetAllMachinesId     = array();
+	$parcelTargetAllMachinesDetail = array();
+	$parcelTargetMachinesId        = array();
+
+	if(is_array(@$allMachines['result']) && !empty($allMachines['result']))
+	{
+		foreach($allMachines['result'] as $key => $machine)
+		{
+			$parcelTargetAllMachinesId[$machine->id] = $machine->id .
+				', ' . @$machine->address->city . ', ' .
+				@$machine->address->street;
+
+			$parcelTargetAllMachinesDetail[$machine->id] = array(
+				'id' => $machine->id,
+				'address' => array(
+				'building_number' => @$machine->address->building_number,
+				'flat_number' => @$machine->address->flat_number,
+				'post_code' => @$machine->address->post_code,
+				'province' => @$machine->address->province,
+				'street' => @$machine->address->street,
+				'city' => @$machine->address->city
+				)
+			);
+
+			// Now check to see if it is a local machine to the
+			// shipping city.
+			if(@$machine->address->city == $city)
+			{
+				$parcelTargetMachinesId[$machine->id] = $machine->id .
+					', ' . @$machine->address->city . ', ' .
+					@$machine->address->street;
+
+			}
+		}
+	}
+?>
+<select name="hidden_machine_list" id="hidden_machine_list" style="display:none;">
+<?php foreach($parcelTargetAllMachinesDetail as $key => $value): ?>
+<option value='<?php echo $key; ?>'><?php echo $value['address']['city'] . ';' . $value['address']['street'] . ';' . $value['address']['building_number'] . ';';?></option>
+<?php endforeach; ?>
+</select>
+
+<?php
+$shipping_inpostparcels = Mage::registry('inpostparcelsData');
+?>
+<!-- Inpst.en -->
+
+<fieldset id="shipping-method-container">
+<?php if ($this->getCanEditShippingMethod() || !$this->getCurrentShippingRate()):?>
+        <?php if ($groups = $this->getShippingRateGroups()):?>
+            <?php $currentRate = $this->getCurrentShippingRate(); ?>
+            <select name="shipping_method" id="shipping_method" style="width:250px;" class="required-entry">
+            <?php if (!$currentRate):?>
+                <option value=""><?php echo $this->__('Please select a shipping method...') ?></option>
+            <?php endif;?>
+            <?php foreach ($groups as $code => $rates):?>
+                <optgroup label="<?php echo $this->escapeHtml($this->getCarrierName($code)) ?>" style="font-style:normal;">
+                <?php foreach ($rates as $rate):?>
+                    <option value="<?php echo $this->renderShippingRateValue($rate)?>"<?php echo ($currentRate === $rate) ? ' selected="selected"' : '' ;?>>
+                        <?php echo $this->renderShippingRateOption($rate)?>
+                    </option>
+                <?php endforeach;?>
+                </optgroup>
+            <?php endforeach;?>
+            </select>
+<!-- Inpost.sn -->
+	<div id="inpost_locker_div" style="display:none;">
+        <script type="text/javascript" src="https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function"></script>
+<script type="text/javascript">
+function user_function(value)
+{
+	var address = value.split(';');
+	//document.getElementById('town').value=address[1];
+	//document.getElementById('street').value=address[2]+address[3];
+	var box_machine_name = document.getElementById('name').value;
+	var box_machine_town = document.value = address[1];
+	var box_machine_street = document.value = address[2];
+
+
+        var is_value = 0;
+        document.getElementById('shipping_inpostparcels').value = box_machine_name;
+        var shipping_inpostparcels = document.getElementById('shipping_inpostparcels');
+
+        for (i = 0; i < shipping_inpostparcels.length; i++) {
+            if (shipping_inpostparcels.options[i].value == document.getElementById('name').value) {
+                shipping_inpostparcels.selectedIndex = i;
+                is_value = 1;
+            }
+        }
+
+        if (is_value == 0) {
+            shipping_inpostparcels.options[shipping_inpostparcels.options.length] = new Option(box_machine_name + ',' + box_machine_town + ',' + box_machine_street, box_machine_name);
+            shipping_inpostparcels.selectedIndex = shipping_inpostparcels.length - 1;
+        }
+    }
+</script>
+
+		<span class="input-box">
+		<!-- Hidden fields -->
+		<input type="hidden" name="form_key" value="<?php echo Mage::getSingleton('core/session')->getFormKey(); ?>" />
+		<input type="hidden" id="name" name="name" disabled="disabled" />
+		<input type="hidden" id="box_machine_town" name="box_machine_town" disabled="disabled" />
+		<input type="hidden" id="address" name="address" disabled="disabled" />
+
+		<!-- User InPost Fields -->
+		<select class="required-entry" id="shipping_inpostparcels" name="shipping_inpostparcels[parcel_target_machine_id]">
+				<option value=''><?php echo $this->__('Please Select a Locker'); ?></option>
+                <?php foreach($parcelTargetMachinesId as $key => $parcelTargetMachineId): ?>
+			<option value='<?php echo $key ?>'><?php echo $parcelTargetMachineId; ?></option>
+                <?php endforeach; ?>
+
+		</select>
+		<br />
+        	<a href="#" onClick="openMap(); return false;"><?php echo $this->__('Map')?></a>
+		
+	&nbsp; | &nbsp; <input type="checkbox" name="show_all_machines"><?php echo $this->__('Show terminals in other cities') ?> 
+
+        	<br />
+        	<label for="inpostparcels_phone" style="color:red;" class="required">*Mobile e.g. 523045856</label>
+		<br />
+		(07)<input type="text" name="shipping_inpostparcels[receiver_phone]" id="inpostparcels_phone" class="validate-number minimum-length-9 maximum-length-9 inpostparcels_phone" value="" maxlength="9" />
+		</span>
+<script type="text/javascript">
+var $j2 = jQuery.noConflict();
+
+$j2(document).ready(function(){
+
+    $j2('input[type="checkbox"][name="show_all_machines"]').click(function(){
+        var machines_list_type = $j2(this).is(':checked');
+
+	if(machines_list_type == true)
+	{
+            var machines = {
+                '' : '<?php echo $this->__('Select Machine..') ?>',
+            <?php foreach($parcelTargetAllMachinesId as $key => $parcelTargetAllMachineId): ?>
+                '<?php echo $key ?>' : '<?php echo addslashes($parcelTargetAllMachineId) ?>',
+            <?php endforeach; ?>
+		};
+	}
+	else
+	{
+            var machines = {
+                '' : '<?php echo $this->__('Select Machine..') ?>',
+            <?php foreach($parcelTargetMachinesId as $key => $parcelTargetMachineId): ?>
+                '<?php echo $key ?>' : '<?php echo addslashes($parcelTargetMachineId) ?>',
+            <?php endforeach; ?>			
+                        };
+        }
+
+        $j2('#shipping_inpostparcels option').remove();
+        $j2.each(machines, function(val, text) {
+            $j2('#shipping_inpostparcels').append(
+                    $j2('<option></option>').val(val).html(text)
+            );
+        });
+    });
+
+    $j2('input[type="radio"][name="shipping_method"]').click(function(){
+        if($j2("#s_method_inpostparcels_inpostparcels").is(":checked")){
+            $j2("#shipping_form_inpostparcels_inpostparcels").css("display");
+        }else{
+            $j2("#shipping_form_inpostparcels_inpostparcels").css("display","none");
+        }
+    });
+	$j2('#shipping_inpostparcels').change(function(){
+		// Check and set the hidden fields for the machine's data
+		// hidden_machine_list
+		$j2('[name=hidden_machine_list]').val(
+			$j2('#shipping_inpostparcels').val() );
+
+		$j2('#address').val($j2("#hidden_machine_list option:selected" ).text() );
+	});
+});
+
+</script>
+	<!-- Hidden Fields, allow us to save details -->
+	<input type="hidden" name="inpost_hidden_machine" id="inpost_hidden_machine" value="daz_01" />
+	<input type="hidden" name="inpost_hidden_mobile" id="inpost_hidden_mobile" value="daz_02" />
+	<input type="hidden" name="inpost_hidden_details" id="inpost_hidden_details" value="daz_03" />
+
+        <!-- Replace the normal submit button to allow the checking of the new
+             fields. The submit is carried out by the check_fields -->
+
+	<button id="check_data_fields" name="check_data_fields" onClick="return check_fields();" class="button" >
+		<span><span><?php echo $this->__('Place an Order') ?></span></span></button>
+<!-- Inpost.en -->
+
+        <?php else: ?>
+            <p><strong><?php echo $this->__('Sorry, no quotes are available for this order at this time.') ?></strong></p>
+        <?php endif;?>
+<?php else: ?>
+    <p><strong><?php echo $this->renderShippingRateOption($this->getCurrentShippingRate())?></strong></p>
+<?php endif; ?>
+</fieldset>
+<div style="display:none" id="shipping_method_update"><p><?php echo $this->__('Please update order data to get shipping methods and rates') ?></p></div>

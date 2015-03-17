@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
     <checkout_onepage_index>
+	<!-- Remove the OLD jquery include
     	<reference name='head'>
     		<reference name="head">
 	            <action method="addItem"><type>js</type><name>inpostparcels/jquery-1.6.4.min.js</name></action>
-                <!--<action method="addItem"><name>https://geowidget.inpost.co.uk/dropdown.php?dropdown_name=machine&field_to_update=name&field_to_update2=address&user_function=user_function</name></action>-->
                 <action method="addItem"><type>js</type><name>inpostparcels/noconflict.js</name></action>
         	</reference>
-    	</reference>
+	</reference> -->
     	<reference name='checkout.onepage.shipping_method.available'>
     		<action method='setTemplate'><template>inpostparcels/checkout/onepage/shipping_method/available.phtml</template></action>
     	</reference>
@@ -17,4 +17,47 @@
     		<action method='setTemplate'><template>inpostparcels/checkout/onepage/shipping_method/available.phtml</template></action>
     	</reference>
     </checkout_onepage_shippingmethod>
+    <!-- Override the default paypal review template -->
+    <!-- The PayPal Express details .sn -->
+    <paypal_express_review>
+    	<reference name='root'>
+		<block type='paypal/express_review' name='paypal.express.review' template='inpostparcels/express/review.phtml'>
+<block type="paypal/express_review" name="express.review.shipping.method" as="shipping_method" template="paypal/express/review/shipping/method.phtml"/>
+                <block type="paypal/express_review_details" name="paypal.express.review.details" as="details" template="paypal/express/review/details.phtml">
+                    <action method="addItemRender"><type>default</type><block>checkout/cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
+                    <action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>checkout/onepage/review/item.phtml</template></action>
+                    <action method="addItemRender"><type>configurable</type><block>checkout/cart_item_renderer_configurable</block><template>checkout/onepage/review/item.phtml</template></action>
+                    <block type="checkout/cart_totals" name="paypal.express.review.details.totals" as="totals" template="checkout/onepage/review/totals.phtml"/>
+                </block>
+                <block type="checkout/agreements" name="paypal.express.review.details.agreements" as="agreements" template="checkout/onepage/agreements.phtml"/>
+		</block>
+	</reference>
+    </paypal_express_review>
+    <!-- The PayPal Express details .en -->
+    <!-- The Amazon Payment details .sn -->
+    <!-- Also override the onepage shipping method. For some reason the list of carriers will not load in the main page itself. -->
+    <amazonpayments_advanced_shippingmethod>
+        <remove name="right"/>
+        <remove name="left"/>
+        <block type="checkout/onepage_shipping_method_available" name="root" output="toHtml" template="inpostparcels/onepage/shipping_method/available.phtml"/>
+    </amazonpayments_advanced_shippingmethod>
+    <amazonpayments_advanced_review>
+        <remove name="right"/>
+        <remove name="left"/>
+        <block type="checkout/onepage_review_info" name="root" output="toHtml" template="checkout/onepage/review/info.phtml">
+            <action method="addItemRender"><type>default</type><block>checkout/cart_item_renderer</block><template>checkout/onepage/review/item.phtml</template></action>
+            <action method="addItemRender"><type>grouped</type><block>checkout/cart_item_renderer_grouped</block><template>checkout/onepage/review/item.phtml</template></action>
+            <action method="addItemRender"><type>configurable</type><block>checkout/cart_item_renderer_configurable</block><template>checkout/onepage/review/item.phtml</template></action>
+            <block type="checkout/cart_totals" name="checkout.onepage.review.info.totals" as="totals" template="checkout/onepage/review/totals.phtml"/>
+            <block type="core/text_list" name="checkout.onepage.review.info.items.before" as="items_before" translate="label">
+                <label>Items Before</label>
+            </block>
+            <block type="core/text_list" name="checkout.onepage.review.info.items.after" as="items_after" translate="label">
+                <label>Items After</label>
+            </block>
+            <block type="checkout/agreements" name="checkout.onepage.agreements" as="agreements" template="checkout/onepage/agreements.phtml"/>
+            <block type="core/template" name="checkout.onepage.review.button" as="button" template="inpostparcels/checkout/review/button.phtml"/>
+        </block>
+    </amazonpayments_advanced_review>
+     <!-- The Amazon Payment details .en -->
 </layout>

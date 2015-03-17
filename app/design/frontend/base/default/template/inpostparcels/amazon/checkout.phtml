@@ -1,0 +1,64 @@
+<?php
+/**
+ * This file is part of the official Amazon Payments Advanced extension
+ * for Magento (c) creativestyle GmbH <amazon@creativestyle.de>
+ * All rights reserved
+ *
+ * Reuse or modification of this source code is not allowed
+ * without written permission from creativestyle GmbH
+ *
+ * @category   Creativestyle
+ * @package    Creativestyle_AmazonPayments
+ * @copyright  Copyright (c) 2014 creativestyle GmbH
+ * @author     Marek Zabrowarny / creativestyle GmbH <amazon@creativestyle.de>
+ */
+// 11/03/2015 Added the InPost extra fields and validation.
+?>
+<div class="page-title">
+    <h1><?php echo $this->__('Pay with Amazon'); ?></h1>
+</div>
+<?php echo $this->getChildHtml('capture_notice'); ?>
+<ol class="apa<?php if ($this->isVirtual()): ?> apa-virtual-checkout<?php endif; ?>" id="checkoutSteps">
+    <?php if ($this->showSandboxToolbox()): ?>
+        <li class="section store-widget">
+            <div class="step-title">
+                <h2><?php echo $this->helper('amazonpayments')->__('Sandbox Toolbox'); ?></h2>
+            </div>
+            <div class="section-content"><?php echo $this->getChildHtml('sandbox_toolbox'); ?></div>
+        </li>
+    <?php endif; ?>
+    <?php if (!$this->isVirtual()): ?>
+        <li id="apa-shipping" class="section amazon-widget">
+            <div id="addressBookWidgetDiv"></div>
+        </li>
+    <?php endif; ?>
+    <li id="apa-payment" class="section amazon-widget">
+        <div id="walletWidgetDiv"></div>
+    </li>
+    <?php if (!$this->isVirtual()): ?>
+        <form id="co-shipping-method-form" action="">
+            <li id="apa-shipping_method" class="section narrow-section store-widget">
+                <div class="step-title">
+                    <h2><?php echo $this->helper('checkout')->__('Shipping Method'); ?></h2>
+                </div>
+                <div class="section-content"><?php echo $this->getChildHtml('shipping_method'); ?></div>
+                <div class="section-please-wait"></div>
+            </li>
+            <?php if ($additional = $this->getChildHtml('additional')): ?>
+                <li id="apa-shipping_method_additional" class="section store-widget">
+                    <div class="step-title"></div>
+                    <div class="section-content" id="amazonpayments-checkout-shipping-method-additional-load">
+                        <?php echo $additional; ?>
+                    </div>
+                </li>
+            <?php endif; ?>
+        </form>
+    <?php endif; ?>
+    <li id="apa-review" class="section review-section store-widget">
+        <div class="step-title">
+            <h2><?php echo $this->helper('checkout')->__('Order Review'); ?></h2>
+        </div>
+        <div id="reviewWidgetDiv" class="section-content"><?php echo $this->getChildHtml('review'); ?></div>
+        <div class="section-please-wait"></div>
+    </li>
+</ol>

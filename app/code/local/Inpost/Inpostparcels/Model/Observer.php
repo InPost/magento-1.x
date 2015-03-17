@@ -2,55 +2,114 @@
 
 class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 {
-	public function saveShippingMethod($evt){
+	///
+	// saveShippingMethod
+	//
+	// @param The details of the event.
+	//
+	public function saveShippingMethod($evt)
+	{
+		if(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod() != 'inpostparcels_inpostparcels')
+		{
+			return;
+		}
 
-        if(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod() != 'inpostparcels_inpostparcels'){
-            return;
-        }
+		$request = $evt->getRequest();
+		$quote   = $evt->getQuote();
+		$shippingAddress = $quote->getShippingAddress();
 
-        $request = $evt->getRequest();
-		$quote = $evt->getQuote();
-        $shippingAddress = $quote->getShippingAddress();
-
-        $inpostparcels = $request->getParam('shipping_inpostparcels',false);
+		$inpostparcels = $request->getParam('shipping_inpostparcels',
+			false);
 		$quote_id = $quote->getId();
 		$data = array($quote_id => $inpostparcels);
 
-        //Mage::log(var_export($data, 1) . '------', null, 'save_shipping_method_DATA.log');
+		//Mage::log(var_export($data, 1) . '------', null, 'save_shipping_method_DATA.log');
 
-        $parcelTargetMachineId = @$data[$quote_id]['parcel_target_machine_id'];
-        $parcelTargetMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetMachinesDetail();
-        $parcelTargetAllMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetAllMachinesDetail();
-        $parcelTargetMachineDetail = array();
+		$parcelTargetMachineId = @$data[$quote_id]['parcel_target_machine_id'];
+		$parcelTargetMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetMachinesDetail();
+		$parcelTargetAllMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetAllMachinesDetail();
 
-        if(isset($parcelTargetMachinesDetail[@$data[$quote_id]['parcel_target_machine_id']])){
-            $parcelTargetMachineDetail = $parcelTargetMachinesDetail[$parcelTargetMachineId];
-        }else{
-            $parcelTargetMachineDetail = $parcelTargetAllMachinesDetail[$parcelTargetMachineId];
-        }
+		// Because we are tring to support multiple checkout types if
+		// the parcel details are null try and get the details from
+		// the central system.
+		if($parcelTargetMachinesDetail == null &&
+			$parcelTargetAllMachinesDetail == null &&
+			strlen(@$data[$quote_id]['parcel_target_machine_id']) > 1)
+		{
+			// We must do a quick REST API call to get the details
+			// of the machine.
+			//Mage::log('parcel target machine detail is NULL.');
+			$params = array(
+				'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').
+					'machines/' .
+					@$data[$quote_id]['parcel_target_machine_id'],
+				'methodType' => 'GET',
+				'params' => array()
+			);
 
-        $data[$quote_id]['parcel_detail'] = array(
-            'description' => '',
-            'receiver' => array(
-                'email' => $shippingAddress->getEmail(),
-                'phone' => @$data[$quote_id]['receiver_phone']
-            ),
-            'size' => Mage::getSingleton('checkout/session')->getParcelSize(),
-            'tmp_id' => Mage::helper('inpostparcels/data')->generate(4, 15),
-            'target_machine' => $parcelTargetMachineId
-        );
+			$ret = Mage::helper('inpostparcels')->connectInpostparcels($params);
 
-        $data[$quote_id]['parcel_target_machine'] = $parcelTargetMachineId;
-        $data[$quote_id]['parcel_target_machine_detail'] = $parcelTargetMachineDetail;
+			if($ret['info']['http_code'] == 200)
+			{
+				if(isset($ret['result']->address->flat_number))
+				{
+					$flat_number = $ret['result']->address->flat_number;
+				}
+				else
+				{
+					$flat_number = NULL;
+				}
+				// We have the machine details.
+            			$parcelTargetMachinesDetail[$parcelTargetMachineId] = array(
+				'id'      => @$data[$quote_id]['parcel_target_machine_id'],
+				'address' => array(
+					'building_number' => $ret['result']->address->building_number,
+					'flat_number' => $flat_number,
+					'postcode' => $ret['result']->address->post_code,
+					'province' => $ret['result']->address->province,
+					'street'   => $ret['result']->address->street,
+					'city'     => $ret['result']->address->city,
+					)
+				);
+			}
+		}
 
-        //Mage::log(var_export($data, 1) . '------', null, 'save_shipping_method.log');
-        if($inpostparcels){
-            Mage::getSingleton('checkout/session')->setInpostparcels($data);
-        }
+		$parcelTargetMachineDetail = array();
+
+		if(isset($parcelTargetMachinesDetail[@$data[$quote_id]['parcel_target_machine_id']]))
+		{
+			$parcelTargetMachineDetail = $parcelTargetMachinesDetail[$parcelTargetMachineId];
+		}
+		else
+		{
+			$parcelTargetMachineDetail = $parcelTargetAllMachinesDetail[$parcelTargetMachineId];
+		}
+
+		$data[$quote_id]['parcel_detail'] = array(
+			'description' => '',
+			'receiver' => array(
+				'email' => $shippingAddress->getEmail(),
+				'phone' => @$data[$quote_id]['receiver_phone']
+			),
+			'size' => Mage::getSingleton('checkout/session')->getParcelSize(),
+			'tmp_id' => Mage::helper('inpostparcels/data')->generate(4, 15),
+			'target_machine' => $parcelTargetMachineId
+		);
+
+		$data[$quote_id]['parcel_target_machine'] = $parcelTargetMachineId;
+		$data[$quote_id]['parcel_target_machine_detail'] = $parcelTargetMachineDetail;
+
+		//Mage::log(var_export($data, 1) . '------', null, 'save_shipping_method.log');
+		if($inpostparcels)
+		{
+			Mage::getSingleton('checkout/session')->setInpostparcels($data);
+		}
 	}
 
 	///
 	// saveOrderAfter
+	//
+	// @param The event that has triggered the action.
 	//
 	// NB The following code uses a mix of
 	// $order->getId()
@@ -59,34 +118,55 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 	//
 	// It is very impostant that the calls are in the correct places.
 	//
-	public function saveOrderAfter($evt){
-        if(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod() != 'inpostparcels_inpostparcels'){
-            return;
-        }
+	public function saveOrderAfter($evt)
+	{
+		if(Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress()->getShippingMethod() != 'inpostparcels_inpostparcels')
+		{
+			return;
+		}
 
-        $order = $evt->getOrder();
-		$quote = $evt->getQuote();
+		$order    = $evt->getOrder();
+		$quote    = $evt->getQuote();
 		$quote_id = $quote->getId();
 
-        $inpostparcels = Mage::getSingleton('checkout/session')->getInpostparcels();
-        if(isset($inpostparcels[$quote_id])){
+		$inpostparcels = Mage::getSingleton('checkout/session')->getInpostparcels();
+		if(isset($inpostparcels[$quote_id]))
+		{
 			$data = $inpostparcels[$quote_id];
 			$data['order_id'] = $order->getId();
-            $data['parcel_detail']['description'] = 'Order number:'.$order->getIncrementId();
-            switch (Mage::helper('inpostparcels/data')->getCurrentApi()){
-                case 'PL':
-                    $data['parcel_detail']['cod_amount'] = (Mage::getSingleton('checkout/session')->getQuote()->getPayment()->getMethodInstance()->getCode() == 'checkmo')? sprintf("%.2f" ,$order->getGrandTotal()) : '';
-                    break;
-            }
+			$data['parcel_detail']['description'] = 'Order number:'.$order->getIncrementId();
+			switch (Mage::helper('inpostparcels/data')->getCurrentApi())
+			{
+				case 'PL':
+				$data['parcel_detail']['cod_amount'] = (Mage::getSingleton('checkout/session')->getQuote()->getPayment()->getMethodInstance()->getCode() == 'checkmo')? sprintf("%.2f" ,$order->getGrandTotal()) : '';
+				break;
+			}
+			// Check to see if the user's email address is set or
+			// not. If not get it from the order details. They
+			// are paying using Amazon Payments.
+			if(!isset($data['parcel_detail']['receiver']['email']))
+			{
+				$data['parcel_detail']['receiver']['email'] = $order->getCustomerEmail();
+			}
+			// Check to see if the phone number enetered is 9
+			// digits or if it is longer.
+			$phone_len = strlen($data['parcel_detail']['receiver']['phone']);
 
-            $inpostparcelsModel = Mage::getModel('inpostparcels/inpostparcels');
-            $inpostparcelsModel->setOrderId($data['order_id']);
-            $inpostparcelsModel->setParcelDetail(json_encode($data['parcel_detail']));
-            $inpostparcelsModel->setParcelTargetMachineId($data['parcel_target_machine_id']);
-            $inpostparcelsModel->setParcelTargetMachineDetail(json_encode($data['parcel_target_machine_detail']));
-            $inpostparcelsModel->setApiSource(Mage::helper('inpostparcels/data')->getCurrentApi());
-            $inpostparcelsModel->save();
-            //Mage::log(var_export($data, 1) . '------', null, 'save_order_after.log');
+			if($phone_len > 9)
+			{
+				$data['parcel_detail']['receiver']['phone'] = 
+					substr($data['parcel_detail']['receiver']['phone'],
+						-9);
+			}
+
+			$inpostparcelsModel = Mage::getModel('inpostparcels/inpostparcels');
+			$inpostparcelsModel->setOrderId($data['order_id']);
+			$inpostparcelsModel->setParcelDetail(json_encode($data['parcel_detail']));
+			$inpostparcelsModel->setParcelTargetMachineId($data['parcel_target_machine_id']);
+			$inpostparcelsModel->setParcelTargetMachineDetail(json_encode($data['parcel_target_machine_detail']));
+			$inpostparcelsModel->setApiSource(Mage::helper('inpostparcels/data')->getCurrentApi());
+			$inpostparcelsModel->save();
+			//Mage::log(var_export($data, 1) . '------', null, 'save_order_after.log');
 		}
 		// PayPal change SN
 		else
@@ -96,6 +176,21 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 			if($quote->getInpostparcelsData())
 			{
 				$var = $quote->getInpostparcelsData();
+
+				if(strlen($var['parcel_receiver_email']) == 0)
+				{
+					// If the checkout has been triggered
+					// from Amazon Payments then the email
+					// address will be EMPTY. Fill it now.
+					$evt['parcel_receiver_email'] = $order->getCustomerEmail();
+				}
+				$phone_len = strlen($var['parcel_receiver_phone']);
+				if($phone_len > 9)
+				{
+					$var['parcel_receiver_phone'] = 
+						substr($var['parcel_receiver_phone'],
+							-9);
+				}
 
 				//Mage::log('Order = ' . $order->getIncrementId() .
 					//' quote = ' . $quote->getId());
@@ -148,29 +243,39 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 		// PayPal change EN
 	}
 
-    public function loadOrderAfter($evt){
-        $order = $evt->getOrder();
-        if($order->getId()){
+	///
+	// loadOrderAfter
+	//
+	public function loadOrderAfter($evt)
+	{
+		$order = $evt->getOrder();
+		if($order->getId())
+		{
             $order_id = $order->getId();
             $inpostparcelsCollection = Mage::getModel('inpostparcels/inpostparcels')->getCollection();
             $inpostparcelsCollection->addFieldToFilter('order_id',$order_id);
             $inpostparcels = $inpostparcelsCollection->getFirstItem();
             $order->setInpostparcelsObject($inpostparcels);
-        }
-    }
+		}
+	}
 
-    public function loadQuoteAfter($evt)
-    {
-        $quote = $evt->getQuote();
-        if($quote->getId()){
-            $quote_id = $quote->getId();
-            $inpostparcels = Mage::getSingleton('checkout/session')->getInpostparcels();
-            if(isset($inpostparcels[$quote_id])){
-                $data = $inpostparcels[$quote_id];
-                $quote->setInpostparcelsData($data);
-            }
-        }
-    }
+	///
+	// loadQuoteAfter
+	//
+	public function loadQuoteAfter($evt)
+	{
+		$quote = $evt->getQuote();
+		if($quote->getId())
+		{
+			$quote_id = $quote->getId();
+			$inpostparcels = Mage::getSingleton('checkout/session')->getInpostparcels();
+			if(isset($inpostparcels[$quote_id]))
+			{
+				$data = $inpostparcels[$quote_id];
+				$quote->setInpostparcelsData($data);
+			}
+		}
+	}
 
 	// PayPal change SN
 	///
