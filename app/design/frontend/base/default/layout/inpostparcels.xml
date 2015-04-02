@@ -1,13 +1,11 @@
 <?xml version="1.0"?>
 <layout version="0.1.0">
     <checkout_onepage_index>
-	<!-- Remove the OLD jquery include
     	<reference name='head'>
     		<reference name="head">
-	            <action method="addItem"><type>js</type><name>inpostparcels/jquery-1.6.4.min.js</name></action>
-                <action method="addItem"><type>js</type><name>inpostparcels/noconflict.js</name></action>
+                <action method="addItem"><type>js</type><name>inpostparcels/checkout_geo.js</name></action>
         	</reference>
-	</reference> -->
+	</reference>
     	<reference name='checkout.onepage.shipping_method.available'>
     		<action method='setTemplate'><template>inpostparcels/checkout/onepage/shipping_method/available.phtml</template></action>
     	</reference>
