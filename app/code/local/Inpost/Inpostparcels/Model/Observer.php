@@ -82,7 +82,19 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 		}
 		else
 		{
-			$parcelTargetMachineDetail = $parcelTargetAllMachinesDetail[$parcelTargetMachineId];
+			if(isset($parcelTargetAllMachinesDetail[$parcelTargetMachineId]))
+			{
+				$parcelTargetMachineDetail = $parcelTargetAllMachinesDetail[$parcelTargetMachineId];
+			}
+		}
+
+		// We can be called between the user updating the shipping
+		// method. I.e. when the user switches between options.
+		if(!isset($parcelTargetMachineDetail) ||
+			$parcelTargetMachineDetail == '')
+		{
+			// Don't try and save the details as we don't have any.
+			return;
 		}
 
 		$data[$quote_id]['parcel_detail'] = array(
