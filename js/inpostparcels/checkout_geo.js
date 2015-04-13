@@ -1,6 +1,35 @@
 // Add the Geo Widget to the page and the callback function.
 document.write('<script type="text/javascript" src="https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function"></script>');
 
+// Once the page has loaded we can do the necessary processing to show / hide
+// the InPost extra fields.
+Event.observe(window, 'load', function() {
+	hideShippingAll();
+
+//	var methods = document.getElementsByName('shipping_method');
+//	for(var i = 0; i < methods.length; i++)
+//	{
+//		console.log("Method = " + methods[i]);
+//		console.log(methods[i]);
+//	}
+
+	jQuery('input[type="radio"][name="shipping_method"]').click(function(){
+		hideShippingAll();
+		var code = jQuery(this).val();
+		if(jQuery(this).is(':checked'))
+		{
+			showShipping(code);
+		}
+	});
+	jQuery('input[type="radio"][name="shipping_method"]').each(function(){
+		var code = jQuery(this).val();
+		if(jQuery(this).is(":checked"))
+		{
+			showShipping(code);
+		}
+	});
+});
+
 ///
 // user_function
 //
@@ -35,3 +64,30 @@ function user_function(value)
 		shipping_inpostparcels.selectedIndex = shipping_inpostparcels.length-1;
 	}
 }
+
+///
+// showShipping
+//
+// @param The code for the field names
+//
+function showShipping(code)
+{
+	if(jQuery('#'+'shipping_form_'+code).length != 0)
+	{
+		jQuery('#'+'shipping_form_'+code).show();
+		jQuery(this).find('.required-entry').attr('disabled','false');
+	}
+}
+
+///
+// hideShippingAll
+//
+function hideShippingAll()
+{
+	jQuery('input[type="radio"][name="shipping_method"]').each(function(){
+		var code = jQuery(this).val();
+		jQuery('#'+'shipping_form_'+code).hide();
+		jQuery(this).find('.required-entry').attr('disabled','true');
+	});
+}
+

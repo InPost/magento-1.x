@@ -20,12 +20,14 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 
 		$inpostparcels = $request->getParam('shipping_inpostparcels',
 			false);
+
 		$quote_id = $quote->getId();
 		$data = array($quote_id => $inpostparcels);
 
 		//Mage::log(var_export($data, 1) . '------', null, 'save_shipping_method_DATA.log');
 
 		$parcelTargetMachineId = @$data[$quote_id]['parcel_target_machine_id'];
+
 		$parcelTargetMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetMachinesDetail();
 		$parcelTargetAllMachinesDetail = Mage::getSingleton('checkout/session')->getParcelTargetAllMachinesDetail();
 
@@ -320,7 +322,8 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
 	}
 	// PayPal change EN
 
-    public function salesOrderShipmentSaveAfter($evt){
+	public function salesOrderShipmentSaveAfter($evt)
+	{
         /*
         $shipment = $evt->getShipment();
         $order = $shipment->getOrder();
@@ -393,6 +396,37 @@ class Inpost_Inpostparcels_Model_Observer extends Varien_Object
         // update data order
         //Mage::log(var_export($inpostparcels, 1) . '------', null, 'observer_sales_order_shipment_save_after.log');
         */
-    }
+	}
 
+	///
+	// insertBlock
+	//
+	// @param The observer.
+	// @brief Control how the One Page shipping form shows.
+	//
+	public function insertBlock($observer)
+	{
+		/// @var $_block Mage_Core_Block_Abstrat
+		// Get block instance
+		$_block = $observer->getBlock();
+
+		// Get block type
+		$_type  = $_block->getType();
+
+		// Check block type
+		if($_type == 'checkout/onepage_shipping_method_available')
+		{
+			// Clone block instance
+			$_child = clone $_block;
+
+			// Set another type for block
+			$_child->setType('test/block');
+
+			// Set child for block
+			$_block->setChild('child', $_child);
+		
+			// Set our template
+			$_block->setTemplate('inpostparcels/at.phtml');
+		}
+	}
 }

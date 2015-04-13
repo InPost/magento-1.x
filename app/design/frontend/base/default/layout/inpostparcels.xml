@@ -34,11 +34,11 @@
     <!-- The PayPal Express details .en -->
     <!-- The Amazon Payment details .sn -->
     <!-- Also override the onepage shipping method. For some reason the list of carriers will not load in the main page itself. -->
-    <amazonpayments_advanced_shippingmethod>
+    <!--<amazonpayments_advanced_shippingmethod>
         <remove name="right"/>
         <remove name="left"/>
         <block type="checkout/onepage_shipping_method_available" name="root" output="toHtml" template="inpostparcels/onepage/shipping_method/available.phtml"/>
-    </amazonpayments_advanced_shippingmethod>
+    </amazonpayments_advanced_shippingmethod>-->
     <amazonpayments_advanced_review>
         <remove name="right"/>
         <remove name="left"/>
@@ -58,4 +58,27 @@
         </block>
     </amazonpayments_advanced_review>
      <!-- The Amazon Payment details .en -->
+
+    <!-- The Fire Checkout details .sn -->
+    <!-- This is left in here in case I work out how to do the override
+	 correctly-->
+    <firecheckout_index_index>
+       	<reference name='head'>
+    		<reference name="head">
+                <action method="addItem"><type>js</type><name>inpostparcels/checkout_geo.js</name></action>
+        	</reference>
+	</reference>
+        <reference name="checkout.onepage.shipping_method.available">
+		<block type="checkout/onepage_shipping_method_available" name="inpost.checout.onepage.shipping_method.available" as="available" template="inpostparcels/firecheckout/checkout/shipping_method/available.phtml" />
+        </reference>
+    </firecheckout_index_index> 
+    <firecheckout_index_updatecheckout>
+        <reference name="checkout.shipping.method">
+            <action method="setTemplate">
+                <template>inpostparcels/firecheckout/checkout/shipping_method/available.phtml</template>
+            </action>
+        </reference>
+    </firecheckout_index_updatecheckout>
+    <!-- The Fire Checkout details .en -->
+
 </layout>

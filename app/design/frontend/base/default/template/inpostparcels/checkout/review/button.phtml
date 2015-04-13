@@ -31,7 +31,7 @@
 		((isset($request['parcel_target_machine_id']) &&
 		strlen($request['parcel_target_machine_id']) == 0) ||
 		(isset($request['receiver_phone']) &&
-		strlen($request['receiver_phone']) < 9)))
+		strlen($request['receiver_phone']) == 0)))
 	{
 		// The user has not filled in the fields.
 		echo "<button type='submit' title='";

@@ -1,37 +1,42 @@
 <?php
-	$_code=$this->getMethodCode();
+	return;
+
+	$_code   = $this->getMethodCode();
 	$carrier = $this->getMethodInstance();
-	$inpostparcelsData = $this->getQuote()->getInpostparcelsData();
-	$_rate = $this->getRate();
+	$inpostparcelsData = Mage::getSingleton('checkout/session')->getQuote()->getInpostparcelsData();
+	$_rate   = $this->getRate();
 
-    //Mage::log(var_export($_SESSION, 1) . '------', null, 'session.log');
+	//Mage::log(var_export($_SESSION, 1) . '------', null, 'session.log');
 
-    $machine_params = array();
-    switch(Mage::helper('inpostparcels/data')->getCurrentApi()){
-        case 'PL':
-            $machine_params['payment_available'] = true;
-            break;
-        case 'UK':
-            $machine_params['status'] = 'Operating';
-            break;
-    }
+	$machine_params = array();
+	switch(Mage::helper('inpostparcels/data')->getCurrentApi())
+	{
+		case 'PL':
+			$machine_params['payment_available'] = true;
+			break;
+		case 'UK':
+			$machine_params['status'] = 'Operating';
+			break;
+	}
 
-    $allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
-        array(
-            'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
-            'methodType' => 'GET',
-            'params' => $machine_params
-        )
-    );
+	$allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
+		array(
+			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
+			'methodType' => 'GET',
+			'params' => $machine_params
+		)
+	);
 
-    $parcelTargetAllMachinesId = array();
-    $parcelTargetAllMachinesDetail = array();
-    $machines = array();
-    $machines_post_code = array();
-    $machines_city = array();
+	$parcelTargetAllMachinesId = array();
+	$parcelTargetAllMachinesDetail = array();
+	$machines = array();
+	$machines_post_code = array();
+	$machines_city = array();
 
-    if(is_array(@$allMachines['result']) && !empty($allMachines['result'])){
-        foreach($allMachines['result'] as $key => $machine){
+	if(is_array(@$allMachines['result']) && !empty($allMachines['result']))
+	{
+		foreach($allMachines['result'] as $key => $machine)
+		{
             $parcelTargetAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
             $parcelTargetAllMachinesDetail[$machine->id] = array(
                 'id' => $machine->id,

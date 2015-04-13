@@ -10,7 +10,7 @@
 
 
     <frontend>
-        <routers>
+	    <!--<routers>
             <inpostparcels>
                 <use>standard</use>
                 <args>
@@ -18,7 +18,7 @@
                     <frontName>inpostparcels</frontName>
                 </args>
             </inpostparcels>
-        </routers>
+	</routers>-->
 
         <translate>
             <modules>
@@ -29,6 +29,18 @@
                 </Inpost_Inpostparcels>
             </modules>
         </translate>
+
+	<events>
+		<core_block_abstract_to_html_before>
+			<observers>
+				<inpostparcels>
+					<type>model</type>
+					<class>inpostparcels/observer</class>
+					<method>insertBlock</method>
+				</inpostparcels>
+			</observers>
+		</core_block_abstract_to_html_before>
+	</events>
 
         <layout>
             <updates>
@@ -185,10 +197,11 @@
                 <!--<max_height>41</max_height>-->
                 <!--<max_depth>38</max_depth>-->
                 <!--<max_width>64</max_width>-->
-                <price>14</price>
+                <price>1.40</price>
                 <!--<sallowspecific>1</sallowspecific>-->
                 <!--<specificcountry>UK</specificcountry>-->
                 <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>
+                <sort_order>99</sort_order>
             </inpostparcels>
         </carriers>
     </default>

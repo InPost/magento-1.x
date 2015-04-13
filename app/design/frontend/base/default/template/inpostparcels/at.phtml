@@ -1,0 +1,188 @@
+<?php
+	echo $this->getChildHtml('child');
+
+	$inpostparcelsData = Mage::getSingleton('checkout/session')->getQuote()->getInpostparcelsData();
+	$address_data      = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();
+
+	//Mage::log($this->getQuote()->getShippingAddress()->getPostcode() );
+	//Mage::log('quote shipping address = ');
+	//Mage::log($address_data->getPostcode());
+
+	//Mage::log(var_export($_SESSION, 1) . '------', null, 'session.log');
+
+	$machine_params = array();
+	switch(Mage::helper('inpostparcels/data')->getCurrentApi())
+	{
+		case 'PL':
+			$machine_params['payment_available'] = true;
+			break;
+		case 'UK':
+			$machine_params['status'] = 'Operating';
+			break;
+	}
+
+	$allMachines = Mage::helper('inpostparcels/data')->connectInpostparcels(
+		array(
+			'url' => Mage::getStoreConfig('carriers/inpostparcels/api_url').'machines',
+			'methodType' => 'GET',
+			'params' => $machine_params
+		)
+	);
+
+	$parcelTargetAllMachinesId     = array();
+	$parcelTargetAllMachinesDetail = array();
+	$machines           = array();
+	$machines_post_code = array();
+	$machines_city      = array();
+
+	if(is_array(@$allMachines['result']) && !empty($allMachines['result']))
+	{
+		foreach($allMachines['result'] as $key => $machine)
+		{
+            $parcelTargetAllMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
+            $parcelTargetAllMachinesDetail[$machine->id] = array(
+                'id' => $machine->id,
+                'address' => array(
+                    'building_number' => @$machine->address->building_number,
+                    'flat_number'     => @$machine->address->flat_number,
+                    'post_code'       => @$machine->address->post_code,
+                    'province'        => @$machine->address->province,
+                    'street'          => @$machine->address->street,
+                    'city'            => @$machine->address->city
+                )
+            );
+
+	    //-------------------------------------------------------------
+	    // Make sure we use binary safe and Case insensitive compare!!!
+	    //-------------------------------------------------------------
+	    if(strcasecmp($machine->address->post_code, $this->getQuote()->getShippingAddress()->getPostcode()) == 0)
+	    {
+                $machines_post_code[$key] = $machine;
+	    }
+	    elseif(strcasecmp($machine->address->city, $this->getQuote()->getShippingAddress()->getCity()) == 0)
+	    {
+                $machines_city[$key] = $machine;
+            }
+        }
+        Mage::getSingleton('checkout/session')->setParcelTargetAllMachinesDetail($parcelTargetAllMachinesDetail);
+
+        if(!empty($machines_post_code)){
+            $machines = $machines_post_code;
+        }else{
+            $machines = $machines_city;
+        }
+    }
+
+    //Mage::log(var_export($allMachines, 1) . '------', null, 'machines.log');
+    //Mage::log(var_export($allMachines, 1) . '------', null, 'all_machines.log');
+
+    $parcelTargetMachinesId = array();
+    $parcelTargetMachinesDetail = array();
+    $defaultSelect = $this->__('Select Machine..');
+    if(is_array(@$machines) && !empty($machines)){
+        foreach($machines as $key => $machine){
+            $parcelTargetMachinesId[$machine->id] = $machine->id.', '.@$machine->address->city.', '.@$machine->address->street;
+            $parcelTargetMachinesDetail[$machine->id] = array(
+                'id' => $machine->id,
+                'address' => array(
+                    'building_number' => @$machine->address->building_number,
+                    'flat_number' => @$machine->address->flat_number,
+                    'post_code' => @$machine->address->post_code,
+                    'province' => @$machine->address->province,
+                    'street' => @$machine->address->street,
+                    'city' => @$machine->address->city
+                )
+            );
+        }
+        Mage::getSingleton('checkout/session')->setParcelTargetMachinesDetail($parcelTargetMachinesDetail);
+    }else{
+        $defaultSelect = $this->__('no terminals in your city');
+    }
+    //Mage::log(var_export($parcelTargetAllMachinesDetail, 1) . '------', null, 'all_machines.log');
+
+    $user_phone = $this->getQuote()->getShippingAddress()->getTelephone();
+    if(!preg_match('/^[1-9]{1}\d{8}$/', $user_phone)){
+        $user_phone = null;
+    }
+
+?>
+<dl class="sp-methods">
+<dd>
+<!-- <ul class="form-list" id="shipping_form_inpostparcels_inpostparcels" style="display:block;"> -->
+<ul class="form-list" id="shipping_form_inpostparcels_inpostparcels">
+    <li>
+        <!--<label for="--><?php //echo @$_code ?><!--_target_box_machine" class="required"><em>*</em>--><?php //echo $this->__('Choose Target Box Machine:') ?><!--</label>-->
+        <span class="input-box">
+            <select class="required-entry" id="shipping_inpostparcels" name="shipping_inpostparcels[parcel_target_machine_id]">
+                <option value='' <?php if(@$inpostparcelsData['parcel_target_machine_id'] == ''){ echo "selected=selected";} ?>><?php echo $defaultSelect;?></option>
+
+                <?php foreach($parcelTargetMachinesId as $key => $parcelTargetMachineId): ?>
+                    <option value='<?php echo $key ?>' <?php if($inpostparcelsData['parcel_target_machine_id'] == $parcelTargetMachineId){ echo "selected=selected";} ?>><?php echo $parcelTargetMachineId;?></option>
+                <?php endforeach; ?>
+
+            </select>
+            <input type="hidden" id="name" name="name" disabled="disabled" />
+            <input type="hidden" id="box_machine_town" name="box_machine_town" disabled="disabled" />
+            <input type="hidden" id="address" name="address" disabled="disabled" />
+            <a href="#" onclick="openMap(); return false;"><?php echo $this->__('Map')?></a>
+            &nbsp;|&nbsp;<input type="checkbox" name="show_all_machines"> <?php echo $this->__('Show terminals in other cities') ?>
+        </span>
+    </li>
+    <li>
+        <label for="inpostparcels_receiver_phone" class="required"><em>*</em><?php echo $this->__("Mobile e.g. 523045856") ?></label>
+        <span class="input-box">
+        	(07) <input type='text' name='shipping_inpostparcels[receiver_phone]' id="inpostparcels_phone" title="Mobile Number to Receive PIN" class='required-entry validate-number validate-length minimum-length-9 maximum-length-9 inpostparcels_phone' value='<?php echo $inpostparcelsData['receiver_phone']?$inpostparcelsData['receiver_phone']:$user_phone?>' />
+        </span>
+    </li>
+</ul>
+</dd>
+</dl>
+
+<script type="text/javascript">
+
+jQuery(document).ready(function(){
+    jQuery('input[type="checkbox"][name="show_all_machines"]').click(function(){
+        var machines_list_type = jQuery(this).is(':checked');
+
+        if(machines_list_type == true){
+            //alert('all machines');
+            var machines = {
+                '' : '<?php echo $this->__('Select Machine..') ?>',
+            <?php foreach($parcelTargetAllMachinesId as $key => $parcelTargetAllMachineId): ?>
+                '<?php echo $key ?>' : '<?php echo addslashes($parcelTargetAllMachineId) ?>',
+            <?php endforeach; ?>
+            };
+        }else{
+            //alert('criteria machines');
+            var machines = {
+                '' : '<?php echo $this->__('Select Machine..') ?>',
+            <?php foreach($parcelTargetMachinesId as $key => $parcelTargetMachineId): ?>
+                '<?php echo $key ?>' : '<?php echo addslashes($parcelTargetMachineId) ?>',
+            <?php endforeach; ?>
+            };
+        }
+
+        jQuery('#shipping_inpostparcels option').remove();
+        jQuery.each(machines, function(val, text) {
+            jQuery('#shipping_inpostparcels').append(
+                    jQuery('<option></option>').val(val).html(text)
+            );
+        });
+    });
+
+	jQuery('input[type="radio"][name="shipping_method"]').click(function()
+	{
+		if(jQuery("#s_method_inpostparcels_inpostparcels").is(":checked"))
+		{
+			jQuery("#shipping_form_inpostparcels_inpostparcels").css("display", "block");
+		}
+		else
+		{
+			jQuery("#shipping_form_inpostparcels_inpostparcels").css("display", "none");
+		}
+    });
+
+});
+
+
+</script>
