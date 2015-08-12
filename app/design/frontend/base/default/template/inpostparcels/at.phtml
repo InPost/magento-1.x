@@ -1,6 +1,16 @@
 <?php
 	echo $this->getChildHtml('child');
 
+    // Check to see if the current screen is to show the InPost parcel
+    // locker details or not.
+    $code = Mage::getSingleton('core/session')->getMyInPostVariable();
+
+    if (isset($code) && strcasecmp($code, "inpostparcels") != 0)
+    {
+        // Don't show anything
+        return;
+    }
+
 	$inpostparcelsData = Mage::getSingleton('checkout/session')->getQuote()->getInpostparcelsData();
 	$address_data      = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();
 

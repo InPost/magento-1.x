@@ -15,8 +15,10 @@ class Inpost_Inpostparcels_Model_Carrier_Inpostparcels  extends Mage_Shipping_Mo
      * @param Mage_Shipping_Model_Rate_Request $data
      * @return Mage_Shipping_Model_Rate_Result
      */
-    public function collectRates(Mage_Shipping_Model_Rate_Request $request) {
-        if (!Mage::getStoreConfig('carriers/'.$this->_code.'/active')) {
+    public function collectRates(Mage_Shipping_Model_Rate_Request $request)
+    {
+        if (!Mage::getStoreConfig('carriers/'.$this->_code.'/active'))
+        {
             return false;
         }
 
@@ -28,13 +30,17 @@ class Inpost_Inpostparcels_Model_Carrier_Inpostparcels  extends Mage_Shipping_Mo
         $cart = Mage::getModel('checkout/cart')->getQuote();
         $maxWeight = 0;
         $maxDimensions = array();
-        foreach ($cart->getAllItems() as $item) {
+        foreach ($cart->getAllItems() as $item)
+        {
             $maxWeight += $item->getProduct()->getWeight();
             $product_dimensions[] = (float)$item->getProduct()->getPackageWidth().'x'.(float)$item->getProduct()->getPackageHeight().'x'.(float)$item->getProduct()->getPackageDepth();
         }
 
         // check max weight ( all products )
-        if($maxWeight != 0 && $maxWeight > Mage::getStoreConfig('carriers/inpostparcels/max_weight')){
+        if($maxWeight != 0 && $maxWeight > Mage::getStoreConfig('carriers/inpostparcels/max_weight'))
+        {
+            // Let the sub-forms know that the parcel cannot be an InPost one.
+            Mage::getSingleton('core/session')->setMyInPostVariable("nope");
             return false;
         }
 
@@ -48,7 +54,10 @@ class Inpost_Inpostparcels_Model_Carrier_Inpostparcels  extends Mage_Shipping_Mo
             )
         );
 
-        if(!$calculateDimension['isDimension']){
+        if(!$calculateDimension['isDimension'])
+        {
+            // Let the sub-forms know that the parcel cannot be an InPost one.
+            Mage::getSingleton('core/session')->setMyInPostVariable("nope");
             return false;
         }
 
@@ -72,10 +81,18 @@ class Inpost_Inpostparcels_Model_Carrier_Inpostparcels  extends Mage_Shipping_Mo
             $error->setErrorMessage($error_message);
             $result->append($error);
         }
+        // Let the sub-forms know that the parcel can be an InPost one.
+        Mage::getSingleton('core/session')->setMyInPostVariable("inpostparcels");
         return $result;
     }
 
-    public function getAllowedMethods() {
+    ///
+    // getAllowedMethods
+    //
+    // @return mixed
+    //
+    public function getAllowedMethods()
+    {
         return array($this->_code => $this->getConfigData('name'));
     }
 
