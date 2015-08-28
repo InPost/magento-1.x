@@ -4,7 +4,7 @@
 
     <modules>
         <Inpost_Inpostparcels>
-            <version>0.1.5</version>
+            <version>0.1.6</version>
         </Inpost_Inpostparcels>
     </modules>
 
@@ -184,9 +184,9 @@
                 <active>1</active>
                 <model>inpostparcels/carrier_inpostparcels</model>
                 <title>InPost Parcel Lockers 24/7</title>
-                <name>Amount</name>
+                <name>InPost Parcels</name>
                 <api_url>API_URL</api_url>
-                <max_weight>20</max_weight>
+                <max_weight>15</max_weight>
                 <max_dimension_a>8x38x64</max_dimension_a>
                 <max_dimension_b>19x38x64</max_dimension_b>
                 <max_dimension_c>41x38x64</max_dimension_c>
@@ -197,7 +197,7 @@
                 <!--<max_height>41</max_height>-->
                 <!--<max_depth>38</max_depth>-->
                 <!--<max_width>64</max_width>-->
-                <price>1.40</price>
+                <price>4.50</price>
                 <!--<sallowspecific>1</sallowspecific>-->
                 <!--<specificcountry>UK</specificcountry>-->
                 <specificerrmsg>This shipping method is currently unavailable. If you would like to ship using this shipping method, please contact us.</specificerrmsg>

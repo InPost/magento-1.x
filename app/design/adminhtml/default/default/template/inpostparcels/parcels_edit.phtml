@@ -99,7 +99,9 @@ $inpostparcelsData = Mage::registry('inpostparcelsData');
 
                 <tr>
                     <td class="label"><?php echo $this->__('Receiver phone'); ?>:<span class="required">*</span></td>
-                    <td class="input-ele"><input class="input-text required-entry" name="parcel_receiver_phone" value="<?php echo $inpostparcelsData['parcel_receiver_phone']; ?>" <?php echo Mage::registry('disabledReceiverPhone'); ?>/></td>
+			<td class="input-ele">
+				<input class="input-text required-entry validate validate-number validate-length minimum-length-9 maximum-length-9" name="parcel_receiver_phone" value="<?php echo $inpostparcelsData['parcel_receiver_phone']; ?>" <?php echo Mage::registry('disabledReceiverPhone'); ?>/>
+			</td>
                 </tr>
 
                 <tr>

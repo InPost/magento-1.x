@@ -70,14 +70,14 @@
 				@$machine->address->street;
 
 			$parcelTargetAllMachinesDetail[$machine->id] = array(
-				'id' => $machine->id,
+				'id'      => $machine->id,
 				'address' => array(
-				'building_number' => @$machine->address->building_number,
-				'flat_number' => @$machine->address->flat_number,
-				'post_code' => @$machine->address->post_code,
-				'province' => @$machine->address->province,
-				'street' => @$machine->address->street,
-				'city' => @$machine->address->city
+					'building_number' => @$machine->address->building_number,
+					'flat_number'     => @$machine->address->flat_number,
+					'post_code'       => @$machine->address->post_code,
+					'province'        => @$machine->address->province,
+					'street'          => @$machine->address->street,
+					'city'            => @$machine->address->city
 				)
 			);
 
@@ -157,11 +157,8 @@ $shipping_inpostparcels = Mage::registry('inpostparcelsData');
                         <?php else: ?>
                             <p><strong><?php echo $this->renderShippingRateOption($this->getCurrentShippingRate())?></strong></p>
                         <?php endif; ?>
-                    </form>
-                </div>
-            </div>
 <!-- Inpost.sn -->
-	<div id="inpost_locker_div" style="display:none;">
+	<div name="inpost_locker_div" id="inpost_locker_div" style="display:none;">
         <script type="text/javascript" src="https://geowidget.inpost.co.uk/dropdown.php?field_to_update=name&field_to_update2=address&user_function=user_function"></script>
 <script type="text/javascript">
 function user_function(value)
@@ -215,7 +212,7 @@ function user_function(value)
         	<br />
         	<label for="inpostparcels_phone" style="color:red;" class="required">*Mobile e.g. 523045856</label>
 		<br />
-		(07)<input type="text" name="shipping_inpostparcels[receiver_phone]" id="inpostparcels_phone" class="validate-number minimum-length-9 maximum-length-9 inpostparcels_phone" value="" maxlength="9" />
+		(07)<input type="text" name="shipping_inpostparcels[receiver_phone]" id="inpostparcels_phone" class="required-entry validate validate-number validate-length minimum-length-9 maximum-length-9 inpostparcels_phone" value="" maxlength="9" />
 		</span>
 <script type="text/javascript">
 var $j2 = jQuery.noConflict();
@@ -256,6 +253,7 @@ $j2(document).ready(function(){
         if($j2("#s_method_inpostparcels_inpostparcels").is(":checked")){
             $j2("#shipping_form_inpostparcels_inpostparcels").css("display");
         }else{
+		alert("in this hidding thingy.");
             $j2("#shipping_form_inpostparcels_inpostparcels").css("display","none");
         }
     });
@@ -270,6 +268,10 @@ $j2(document).ready(function(){
 });
 
 </script>
+	</div> <!-- new hidden div -->
+                    </form>
+                </div>
+            </div>
 <!-- Inpost.en -->
 
         </div>
@@ -401,6 +403,11 @@ function check_fields()
 			alert('Please fill in the mobile number.');
 			return false;
 		}
+		if($j2('#inpostparcels_phone').val().length != 9 )
+		{
+			alert('The mobile number must be 9 characters long.');
+			return false;
+		}
 	}
 	// Save the Machine ID into our hidden field that is on the correct
 	// form.
@@ -422,15 +429,15 @@ function check_fields()
 //
 function showShipping()
 {
-	$j2('#inpost_locker_div').show();
+	$('inpost_locker_div').show();
 }
 
 ///
 // hideShipping
 //
-function hideShippingAll()
+function thideShippingAll()
 {
-	$j2('#inpost_locker_div').hide();
+	$('inpost_locker_div').hide();
 }
 
 ///
@@ -440,13 +447,16 @@ function hideShippingAll()
 //
 $j2(document).ready(function() {
 
+	$j2("").submit(function(event) {
+	});
+
 	if($j2('#shipping_method').val() == 'inpostparcels_inpostparcels')
 	{
 		showShipping();
 	}
 	else
 	{
-		hideShippingAll();
+		thideShippingAll();
 	}
 
 	$j2('#shipping_method').change(function() {
@@ -457,7 +467,7 @@ $j2(document).ready(function() {
 		}
 		else
 		{
-			hideShippingAll();
+			thideShippingAll();
 		}
 	});
 });

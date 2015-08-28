@@ -61,9 +61,8 @@
                             <show_in_website>1</show_in_website>
                             <show_in_store>0</show_in_store>
                         </api_key>
-                        <desc translate="label comment">
+                        <desc translate="label">
                             <label>Description</label>
-                            <comment>Description shown to customer</comment>
                             <frontend_type>textarea</frontend_type>
                             <sort_order>7</sort_order>
                             <show_in_default>1</show_in_default>
@@ -99,7 +98,7 @@
                         <!--</insurance_amount>-->
                         <max_weight translate="label comment">
                             <label>Max weight</label>
-                            <comment>Max weight is 20</comment>
+                            <comment>Max weight is 15kg, for grams is 15000</comment>
                             <frontend_type>text</frontend_type>
                             <validate>validate-number validate-zero-or-greater</validate>
                             <sort_order>11</sort_order>

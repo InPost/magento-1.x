@@ -20,6 +20,13 @@
     <!-- Override the default paypal review template -->
     <!-- The PayPal Express details .sn -->
     <paypal_express_review>
+    	<reference name='head'>
+    		<reference name="head">
+                <action method="addItem"><type>js</type><name>inpostparcels/jquery-1.6.4.min.js</name></action>
+                <action method="addItem"><type>js</type><name>inpostparcels/noconflict.js</name></action>
+                <action method="addItem"><type>js</type><name>inpostparcels/checkout_geo.js</name></action>
+        	</reference>
+	</reference>
     	<reference name='root'>
 		<block type='paypal/express_review' name='paypal.express.review' template='inpostparcels/express/review.phtml'>
 <block type="paypal/express_review" name="express.review.shipping.method" as="shipping_method" template="paypal/express/review/shipping/method.phtml"/>
