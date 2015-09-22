@@ -1,16 +1,6 @@
 <?php
 	echo $this->getChildHtml('child');
 
-    // Check to see if the current screen is to show the InPost parcel
-    // locker details or not.
-    $code = Mage::getSingleton('core/session')->getMyInPostVariable();
-
-    if (isset($code) && strcasecmp($code, "inpostparcels") != 0)
-    {
-        // Don't show anything
-        return;
-    }
-
 	$inpostparcelsData = Mage::getSingleton('checkout/session')->getQuote()->getInpostparcelsData();
 	$address_data      = Mage::getSingleton('checkout/session')->getQuote()->getShippingAddress();
 
@@ -63,13 +53,15 @@
             );
 
 	    //-------------------------------------------------------------
-	    // Make sure we use binary safe and Case insensitive compare!!!
+	    // Make sure we use binary safe and Case insensitive search!!!
+	    // Some of the towns contain "London/Watford" and were not being
+	    // picked up. So we now search for the town.
 	    //-------------------------------------------------------------
-	    if(strcasecmp($machine->address->post_code, $this->getQuote()->getShippingAddress()->getPostcode()) == 0)
+	    if(stripos($machine->address->post_code, $this->getQuote()->getShippingAddress()->getPostcode()) !== false)
 	    {
                 $machines_post_code[$key] = $machine;
 	    }
-	    elseif(strcasecmp($machine->address->city, $this->getQuote()->getShippingAddress()->getCity()) == 0)
+	    elseif(stripos($machine->address->city, $this->getQuote()->getShippingAddress()->getCity()) !== false)
 	    {
                 $machines_city[$key] = $machine;
             }
